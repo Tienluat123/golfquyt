@@ -1,4 +1,5 @@
 import GolfAnalyzer from '../components/GolfAnalyzer/GolfAnalyzer';
+import GolfScene from '../components/GolfScene/GolfScene';
 import './HomePage.css';
 
 export default function HomePage() {
@@ -14,6 +15,9 @@ export default function HomePage() {
       <main>
         <GolfAnalyzer />
       </main>
+      <footer>
+        <GolfScene />
+      </footer>
     </div>
   );
 }
