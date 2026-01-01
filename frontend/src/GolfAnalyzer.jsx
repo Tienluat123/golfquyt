@@ -7,6 +7,7 @@ export default function GolfAnalyzer() {
   const [videoSrc, setVideoSrc] = useState(null);
   const [loadingText, setLoadingText] = useState('Đang khởi động AI...');
   const [progress, setProgress] = useState(0);
+  const [analysisResult, setAnalysisResult] = useState(null);
   const fileInputRef = useRef(null);
 
   // Hàm xử lý khi chọn Video
@@ -16,6 +17,7 @@ export default function GolfAnalyzer() {
       setStatus('processing');
       setProgress(0);
       setLoadingText('Đang tải video lên...');
+      setAnalysisResult(null);
 
       const formData = new FormData();
       formData.append('file', file);
@@ -38,6 +40,21 @@ export default function GolfAnalyzer() {
         setProgress(100);
 
         if (response.ok) {
+          // Read headers
+          const band = response.headers.get('X-Golf-Band');
+          const probs = response.headers.get('X-Golf-Probs');
+          const swingSpeed = response.headers.get('X-Swing-Speed');
+          const armAngle = response.headers.get('X-Arm-Angle');
+          
+          console.log('Headers Received:', { band, probs, swingSpeed, armAngle });
+
+          setAnalysisResult({
+            band: band || 'Unknown',
+            probs: probs,
+            swingSpeed: parseFloat(swingSpeed || 0).toFixed(2),
+            armAngle: parseFloat(armAngle || 0).toFixed(1)
+          });
+
           const blob = await response.blob();
           const videoUrl = URL.createObjectURL(blob);
           setVideoSrc(videoUrl);
@@ -101,16 +118,24 @@ export default function GolfAnalyzer() {
           <div className="video-section">
             {/* Đây là chỗ sau này sẽ hiện video đã vẽ xương */}
             <video src={videoSrc} controls autoPlay loop width="100%" />
-            <div className="ai-overlay-badge">AI ANALYZED</div>
           </div>
 
           <div className="score-section">
             <h2>KẾT QUẢ PHÂN TÍCH</h2>
             
             <div className="rank-card">
-              <div className="rank-title">TRÌNH ĐỘ</div>
-              <div className="rank-value">PRO</div>
-              <div className="rank-stars">⭐⭐⭐⭐⭐</div>
+              <div className="rank-title">HANDICAP BAND</div>
+              <div className="rank-value">
+                {analysisResult?.band ? analysisResult.band.replace('_', '-') : 'Unknown'}
+              </div>
+              <div className="rank-stars">
+                {/* Logic đảo ngược: Band thấp (1-2) ít sao, Band cao (8-10) nhiều sao */}
+                {analysisResult?.band === '1_2' ? '⭐' : 
+                 analysisResult?.band === '2_4' ? '⭐⭐' :
+                 analysisResult?.band === '4_6' ? '⭐⭐⭐' :
+                 analysisResult?.band === '6_8' ? '⭐⭐⭐⭐' : 
+                 analysisResult?.band === '8_10' ? '⭐⭐⭐⭐⭐' : ''}
+              </div>
             </div>
             
             <div className="stats-grid">
@@ -120,11 +145,12 @@ export default function GolfAnalyzer() {
                   <span className="stat-icon">🚀</span>
                   <span>Tốc độ Swing</span>
                 </div>
-                <div className="stat-number">98 <small>mph</small></div>
+                <div className="stat-number">{analysisResult?.swingSpeed || '--'} <small>units</small></div>
                 <div className="visual-bar">
-                  <div className="visual-fill" style={{width: '85%', background: '#ef5350'}}></div>
+                  {/* Giả sử max speed là 10 để tính % bar */}
+                  <div className="visual-fill" style={{width: `${Math.min((analysisResult?.swingSpeed || 0) * 10, 100)}%`, background: '#ef5350'}}></div>
                 </div>
-                <span className="stat-desc">Rất nhanh</span>
+                <span className="stat-desc">Tốc độ cổ tay tối đa</span>
               </div>
 
               {/* Góc tay */}
@@ -133,11 +159,11 @@ export default function GolfAnalyzer() {
                   <span className="stat-icon">📐</span>
                   <span>Góc tay</span>
                 </div>
-                <div className="stat-number">45<small>°</small></div>
+                <div className="stat-number">{analysisResult?.armAngle || '--'}<small>°</small></div>
                 <div className="visual-bar">
-                  <div className="visual-fill" style={{width: '45%', background: '#ffa726'}}></div>
+                  <div className="visual-fill" style={{width: `${Math.min(((analysisResult?.armAngle || 0) / 180) * 100, 100)}%`, background: '#ffa726'}}></div>
                 </div>
-                <span className="stat-desc">Chuẩn PGA</span>
+                <span className="stat-desc">Độ duỗi tay trái tối đa</span>
               </div>
             </div>
 

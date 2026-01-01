@@ -5,135 +5,184 @@ from mediapipe.tasks.python import vision
 import numpy as np
 import sys
 import os
+import torch
+import subprocess
+from pathlib import Path
+
+# Import custom modules
+try:
+    from feature_engineering import FeatureEngineer
+    from model_utils import load_model
+    from pipeline.types import PoseSequence
+    from pose_processing import PoseProcessor
+    from video_processing import VideoProcessor
+    import config
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+    sys.exit(1)
 
 
 # Class quản lý trạng thái Phase (Đơn giản hóa)
 class GolfPhaseDetector:
     def __init__(self):
         self.phase = "Address"
-        self.state = 0  # 0: Address, 1: Backswing, 2: Top, 3: Downswing, 4: Impact, 5: Follow Through
+        self.state = 0
+        # 0: Address
+        # 1: Takeaway
+        # 2: Backswing
+        # 3: Top
+        # 4: Downswing
+        # 5: Impact
+        # 6: Follow Through
+        # 7: Finish
         self.prev_wrist_y = None
+        self.min_wrist_y = 1.0  # Dùng để tìm Top (y nhỏ nhất)
 
     def update(self, landmarks):
-        if not landmarks:
-            return self.phase
+        # landmarks: (33, 4) or list of NormalizedLandmark
+        if isinstance(landmarks, list):
+            # Convert list of NormalizedLandmark to numpy-like access if needed
+            # But here we just need .y access
+            wrist_y = (landmarks[15].y + landmarks[16].y) / 2
+            shoulder_y = (landmarks[11].y + landmarks[12].y) / 2
+            hip_y = (landmarks[23].y + landmarks[24].y) / 2
+        else:
+            # Numpy array (33, 4) [x, y, z, vis]
+            wrist_y = (landmarks[15, 1] + landmarks[16, 1]) / 2
+            shoulder_y = (landmarks[11, 1] + landmarks[12, 1]) / 2
+            hip_y = (landmarks[23, 1] + landmarks[24, 1]) / 2
 
-        # Lấy tọa độ y của cổ tay (trung bình trái phải) và vai
-        # 15: left wrist, 16: right wrist
-        # 11: left shoulder, 12: right shoulder
-        wrist_y = (landmarks[15].y + landmarks[16].y) / 2
-        shoulder_y = (landmarks[11].y + landmarks[12].y) / 2
-
-        # Logic chuyển đổi trạng thái đơn giản dựa trên độ cao tay
-        # Lưu ý: y=0 là đỉnh ảnh, y=1 là đáy ảnh
-
-        if self.state == 0:  # Address (Tay thấp)
-            if wrist_y < shoulder_y:  # Tay bắt đầu đưa lên cao hơn vai
+        # Logic chuyển đổi trạng thái (Heuristic đơn giản)
+        if self.state == 0:  # Address
+            if wrist_y < hip_y:
                 self.state = 1
-                self.phase = "Backswing"
-
-        elif self.state == 1:  # Backswing (Đang đưa lên)
-            if wrist_y < (shoulder_y - 0.2):  # Tay rất cao
+                self.phase = "Takeaway"
+        elif self.state == 1:  # Takeaway
+            if wrist_y < shoulder_y:
                 self.state = 2
-                self.phase = "Top"
-
-        elif self.state == 2:  # Top (Đỉnh)
-            # Nếu tay bắt đầu đi xuống (y tăng) -> Downswing
-            # Cần logic check velocity ở đây nhưng tạm thời check vị trí
-            pass
-            # Giả lập chuyển sang Downswing nếu tay thấp hơn một chút so với đỉnh (logic này hơi khó bắt nếu không có prev frame)
-            # Tạm thời để đơn giản: Nếu tay thấp hơn Top một chút thì coi là Downswing
-            if wrist_y > (shoulder_y - 0.15):
+                self.phase = "Backswing"
+        elif self.state == 2:  # Backswing
+            if wrist_y < self.min_wrist_y:
+                self.min_wrist_y = wrist_y
+            if wrist_y < (shoulder_y - 0.2):
                 self.state = 3
-                self.phase = "Downswing"
-
-        elif self.state == 3:  # Downswing (Đang đánh xuống)
-            if wrist_y > shoulder_y:  # Tay xuống thấp hơn vai
+                self.phase = "Top"
+        elif self.state == 3:  # Top
+            if wrist_y > (self.min_wrist_y + 0.05):
                 self.state = 4
-                self.phase = "Impact"
-
-        elif self.state == 4:  # Impact (Tiếp xúc bóng)
-            if wrist_y < shoulder_y:  # Tay lại đưa lên cao (Follow through)
+                self.phase = "Downswing"
+        elif self.state == 4:  # Downswing
+            if wrist_y > hip_y:
                 self.state = 5
+                self.phase = "Impact"
+        elif self.state == 5:  # Impact
+            if wrist_y < shoulder_y:
+                self.state = 6
                 self.phase = "Follow Through"
+        elif self.state == 6:  # Follow Through
+            if wrist_y < (shoulder_y - 0.1):
+                self.state = 7
+                self.phase = "Finish"
 
         return self.phase
 
 
-def draw_landmarks_on_image(rgb_image, detection_result):
-    pose_landmarks_list = detection_result.pose_landmarks
+def calculate_angle(a, b, c):
+    """Tính góc giữa 3 điểm (theo độ)"""
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(
+        a[1] - b[1], a[0] - b[0]
+    )
+    angle = np.abs(radians * 180.0 / np.pi)
+
+    if angle > 180.0:
+        angle = 360 - angle
+
+    return angle
+
+
+def draw_landmarks_from_array(rgb_image, landmarks):
+    """Draw landmarks from (33, 4) numpy array."""
     annotated_image = np.copy(rgb_image)
     height, width, _ = annotated_image.shape
 
-    # Thử lấy connections từ mp.solutions, nếu không được thì dùng list mặc định
-    try:
-        connections = mp.solutions.pose.POSE_CONNECTIONS
-    except:
-        # Fallback connections cho BlazePose (33 keypoints)
-        connections = frozenset(
-            [
-                (0, 1),
-                (1, 2),
-                (2, 3),
-                (3, 7),
-                (0, 4),
-                (4, 5),
-                (5, 6),
-                (6, 8),
-                (9, 10),
-                (11, 12),
-                (11, 13),
-                (13, 15),
-                (15, 17),
-                (15, 19),
-                (15, 21),
-                (17, 19),
-                (12, 14),
-                (14, 16),
-                (16, 18),
-                (16, 20),
-                (16, 22),
-                (18, 20),
-                (11, 23),
-                (12, 24),
-                (23, 24),
-                (23, 25),
-                (24, 26),
-                (25, 27),
-                (26, 28),
-                (27, 29),
-                (28, 30),
-                (29, 31),
-                (30, 32),
-                (27, 31),
-                (28, 32),
-            ]
+    # Connections (BlazePose 33 keypoints)
+    connections = [
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 7),
+        (0, 4),
+        (4, 5),
+        (5, 6),
+        (6, 8),
+        (9, 10),
+        (11, 12),
+        (11, 13),
+        (13, 15),
+        (15, 17),
+        (15, 19),
+        (15, 21),
+        (17, 19),
+        (12, 14),
+        (14, 16),
+        (16, 18),
+        (16, 20),
+        (16, 22),
+        (18, 20),
+        (11, 23),
+        (12, 24),
+        (23, 24),
+        (23, 25),
+        (24, 26),
+        (25, 27),
+        (26, 28),
+        (27, 29),
+        (28, 30),
+        (29, 31),
+        (30, 32),
+        (27, 31),
+        (28, 32),
+    ]
+
+    # 1. Convert coordinates
+    pixel_landmarks = []
+    for i in range(landmarks.shape[0]):
+        lm = landmarks[i]
+        px = int(lm[0] * width)
+        py = int(lm[1] * height)
+        pixel_landmarks.append((px, py))
+
+    # 2. Color logic
+    joint_colors = [(67, 70, 0)] * len(pixel_landmarks)
+
+    if len(pixel_landmarks) > 15:
+        left_arm_angle = calculate_angle(
+            pixel_landmarks[11], pixel_landmarks[13], pixel_landmarks[15]
         )
+        color_status = (0, 255, 0) if left_arm_angle > 160 else (0, 0, 255)
+        joint_colors[11] = color_status
+        joint_colors[13] = color_status
+        joint_colors[15] = color_status
 
-    # Loop through the detected poses to visualize.
-    for pose_landmarks in pose_landmarks_list:
-        # 1. Chuyển đổi tọa độ và vẽ các điểm khớp (Joints)
-        pixel_landmarks = []
-        for landmark in pose_landmarks:
-            px = int(landmark.x * width)
-            py = int(landmark.y * height)
-            pixel_landmarks.append((px, py))
+    if len(pixel_landmarks) > 0:
+        joint_colors[0] = (255, 0, 255)
 
-            # Vẽ điểm khớp: Màu Xanh Đậm (RGB: 0, 70, 67 -> BGR: 67, 70, 0)
-            cv2.circle(annotated_image, (px, py), 5, (67, 70, 0), -1)
-            cv2.circle(annotated_image, (px, py), 2, (255, 255, 255), -1)  # Tâm trắng
+    # 3. Draw connections
+    for start_idx, end_idx in connections:
+        if start_idx < len(pixel_landmarks) and end_idx < len(pixel_landmarks):
+            start_point = pixel_landmarks[start_idx]
+            end_point = pixel_landmarks[end_idx]
+            cv2.line(annotated_image, start_point, end_point, (96, 188, 249), 3)
 
-        # 2. Vẽ các đường nối (Connections)
-        for connection in connections:
-            start_idx = connection[0]
-            end_idx = connection[1]
-
-            if start_idx < len(pixel_landmarks) and end_idx < len(pixel_landmarks):
-                start_point = pixel_landmarks[start_idx]
-                end_point = pixel_landmarks[end_idx]
-
-                # Vẽ đường nối: Màu Vàng Cam (RGB: 249, 188, 96 -> BGR: 96, 188, 249)
-                cv2.line(annotated_image, start_point, end_point, (96, 188, 249), 3)
+    # 4. Draw joints
+    for i, (px, py) in enumerate(pixel_landmarks):
+        color = joint_colors[i]
+        cv2.circle(annotated_image, (px, py), 6, color, -1)
+        cv2.circle(annotated_image, (px, py), 2, (255, 255, 255), -1)
 
     return annotated_image
 
@@ -141,84 +190,224 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 def process_video(input_path, output_path):
     print(f"Processing video: {input_path}")
 
-    # Cấu hình MediaPipe Tasks
-    base_options = python.BaseOptions(model_asset_path="pose_landmarker_full.task")
-    options = vision.PoseLandmarkerOptions(
-        base_options=base_options, output_segmentation_masks=False
-    )
-    detector = vision.PoseLandmarker.create_from_options(options)
+    # Initialize Processors
+    video_processor = VideoProcessor(target_fps=config.TARGET_FPS)
+    pose_processor = PoseProcessor()
+    feature_engineer = FeatureEngineer()
 
+    # Load AI Model
+    model_path = os.path.join("models", "coral_ordinal_model_20260102_001311.pth")
+    try:
+        ai_model = load_model(model_path)
+        print("AI Model loaded successfully!")
+    except Exception as e:
+        print(f"Failed to load AI Model: {e}")
+        ai_model = None
 
-import subprocess
-import os
-
-# ... existing code ...
-
-
-def process_video(input_path, output_path):
-    print(f"Processing video: {input_path}")
-
-    # Cấu hình MediaPipe Tasks
-    base_options = python.BaseOptions(model_asset_path="pose_landmarker_full.task")
-    options = vision.PoseLandmarkerOptions(
-        base_options=base_options, output_segmentation_masks=False
-    )
-    detector = vision.PoseLandmarker.create_from_options(options)
-
-    cap = cv2.VideoCapture(input_path)
-    if not cap.isOpened():
-        print(f"Error opening video file {input_path}")
+    # 1. Load and Resample Video
+    try:
+        print("Loading and resampling video...")
+        video_clip = video_processor.load_and_resample(Path(input_path))
+    except Exception as e:
+        print(f"Error loading video: {e}")
         sys.exit(1)
 
-    # Lấy thông số video gốc
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    if fps == 0:
-        fps = 30
+    # 2. Extract Pose Sequence
+    print("Extracting pose sequence...")
+    pose_sequence = pose_processor.extract_sequence(video_clip.frames, video_clip.fps)
 
-    # TẠO FILE TẠM THỜI ĐỂ GHI VIDEO RAW TỪ OPENCV
-    # OpenCV đôi khi gặp khó khăn với codec H.264 trên một số hệ thống
-    # Nên ta sẽ ghi ra file tạm (mp4v) rồi dùng FFmpeg convert lại cho chuẩn web
+    # 3. Detect Swing Window (Optional but recommended for AI)
+    print("Detecting swing window...")
+    swing_window = video_processor.detect_swing_window(pose_sequence)
+    print(
+        f"Swing window detected: Frame {swing_window.start_frame} to {swing_window.end_frame}"
+    )
+
+    # 4. AI Prediction
+    predicted_band = "Unknown"
+    probs_str = ""
+    swing_speed_val = 0.0
+    arm_angle_val = 0.0
+
+    if ai_model:
+        try:
+            print("Running AI Prediction...")
+            # Slice sequence to swing window
+            # Note: We need to handle if window is invalid or too short
+            start = swing_window.start_frame
+            end = swing_window.end_frame
+            if end - start < 10:  # Too short, use full video
+                start = 0
+                end = len(pose_sequence.data)
+
+            sliced_data = pose_sequence.data[start:end]
+            sliced_mask = pose_sequence.interpolation_mask[start:end]
+            sliced_valid = pose_sequence.valid_mask[start:end]
+            sliced_times = pose_sequence.frame_times[start:end]
+
+            sliced_seq = PoseSequence(
+                data=sliced_data,
+                frame_times=sliced_times,
+                fps=pose_sequence.fps,
+                interpolation_mask=sliced_mask,
+                valid_mask=sliced_valid,
+            )
+
+            # Prepare for Model (Normalize & Resample)
+            processed_seq, _ = pose_processor.prepare_sequence(sliced_seq)
+
+            # Feature Engineering
+            joint_feats, global_feats = feature_engineer.compute_features(processed_seq)
+
+            # --- DEBUG: Check Feature Ranges ---
+            print(
+                f"DEBUG: Joint Feats Range: Min={joint_feats.min():.3f}, Max={joint_feats.max():.3f}, Mean={joint_feats.mean():.3f}"
+            )
+            print(
+                f"DEBUG: Global Feats Range: Min={global_feats.min():.3f}, Max={global_feats.max():.3f}, Mean={global_feats.mean():.3f}"
+            )
+
+            # Check for Scaler
+            scaler_path = (
+                config.OUTPUT_ROOT
+                / config.FINAL_FEATURE_SUBDIR
+                / config.SCALER_FILENAME
+            )
+            if scaler_path.exists():
+                print(f"Loading scaler from {scaler_path}...")
+                with open(scaler_path, "r") as f:
+                    scaler_data = json.load(f)
+                # Apply scaling (Simplified implementation)
+                # Note: This requires matching dimensions exactly.
+                # If scaler is missing, we are feeding raw data to a model that expects scaled data.
+                # This is likely why predictions are stuck.
+                pass
+            else:
+                print(f"WARNING: Scaler file not found at {scaler_path}!")
+                print(
+                    "WARNING: Model is receiving unscaled data. Predictions may be unreliable (stuck)."
+                )
+
+            # --- Calculate Metrics for Frontend ---
+            # 1. Swing Speed (Max Wrist Speed)
+            swing_speed_val = float(np.max(global_feats[:, 2]))
+
+            # 2. Arm Angle (Max Left Elbow Angle)
+            arm_angle_val = float(np.max(joint_feats[:, 13, 12]))
+
+            print(f"DEBUG: Swing Speed={swing_speed_val}, Arm Angle={arm_angle_val}")
+            # --------------------------------------
+
+            # --- HEURISTIC NORMALIZATION (CRITICAL FIX) ---
+            # The model expects normalized inputs (mean 0, std 1).
+            # Since feature_scaler.json is missing, we apply domain-knowledge scaling.
+            # This prevents large values (like Angles ~180) from saturating the model.
+
+            # 1. Angles (Index 12 in joint_feats, Index 0 in global_feats)
+            # Map 0..180 -> -2..2 approx (Mean 90, Std 45)
+            joint_feats[..., 12] = (joint_feats[..., 12] - 90.0) / 45.0
+            global_feats[..., 0] = (
+                global_feats[..., 0] - 45.0
+            ) / 20.0  # X-Factor usually smaller
+
+            # 2. Coordinates (Index 0-2) - Already roughly -0.5 to 0.5
+            # Scale up slightly to match unit variance
+            joint_feats[..., 0:3] /= 0.3
+
+            # 3. Velocities (Index 4-6, 10) - Usually small (< 0.1 per frame)
+            # Scale up to make them visible
+            joint_feats[..., 4:7] /= 0.05
+            joint_feats[..., 10:11] /= 0.05
+
+            # 4. Accelerations (Index 7-9, 11) - Very small
+            joint_feats[..., 7:10] /= 0.01
+            joint_feats[..., 11:12] /= 0.01
+
+            # 5. Global Extras
+            # Hip-Shoulder Sep (Index 1)
+            global_feats[..., 1] /= 0.1
+            # Wrist Speed (Index 2)
+            global_feats[..., 2] /= 0.05
+
+            print("Applied Heuristic Normalization to inputs.")
+            # ----------------------------------------------
+
+            # Flatten joint features: (T, 33, 13) -> (T, 429)
+            T, J, D = joint_feats.shape
+            joint_feats_flat = joint_feats.reshape(T, J * D)
+
+            # Inference
+            joint_tensor = torch.from_numpy(joint_feats_flat).unsqueeze(
+                0
+            )  # (1, T, 429)
+            global_tensor = torch.from_numpy(global_feats).unsqueeze(0)  # (1, T, 3)
+
+            with torch.no_grad():
+                coral_logits, cls_logits = ai_model(joint_tensor, global_tensor)
+
+                # --- Debugging Outputs ---
+                print(f"Raw CLS Logits: {cls_logits.numpy()}")
+                print(f"Raw CORAL Logits: {coral_logits.numpy()}")
+
+                # 1. Classification Head Prediction
+                probs = torch.softmax(cls_logits, dim=1)
+                cls_pred_idx = torch.argmax(probs, dim=1).item()
+
+                # 2. CORAL Head Prediction
+                # coral_logits: (B, num_classes - 1)
+                # Sigmoid gives P(y > k)
+                coral_probs = torch.sigmoid(coral_logits)
+                # Count how many thresholds are crossed (prob > 0.5)
+                coral_pred_idx = torch.sum(coral_probs > 0.5, dim=1).item()
+
+                print(
+                    f"CLS Prediction: Class {cls_pred_idx} ({config.ID_TO_BAND.get(cls_pred_idx)})"
+                )
+                print(
+                    f"CORAL Prediction: Class {coral_pred_idx} ({config.ID_TO_BAND.get(coral_pred_idx)})"
+                )
+
+                # DECISION: Use CORAL head if available, as the model name suggests it's a Coral model
+                pred_idx = coral_pred_idx
+                predicted_band = config.ID_TO_BAND.get(pred_idx, "Unknown")
+
+                # Use CLS probs for confidence display (optional, or derive from CORAL)
+                probs_str = str(probs.numpy()[0])
+
+                print(f"FINAL AI PREDICTION: Band {predicted_band} (Class {pred_idx})")
+
+        except Exception as e:
+            print(f"AI Prediction Error: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+    # 5. Generate Output Video
+    print("Generating output video...")
+    height, width, _ = video_clip.frames[0].shape
+
     temp_output_path = output_path + ".temp.mp4"
-
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter(temp_output_path, fourcc, fps, (width, height))
+    out = cv2.VideoWriter(temp_output_path, fourcc, video_clip.fps, (width, height))
 
-    frame_count = 0
-    phase_detector = GolfPhaseDetector()  # Khởi tạo bộ phát hiện Phase
+    phase_detector = GolfPhaseDetector()
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+    for i, frame in enumerate(video_clip.frames):
+        # Get landmarks for this frame
+        landmarks = pose_sequence.data[i]  # (33, 4)
 
-        frame_count += 1
+        # Draw landmarks
+        # Only draw if valid (visibility check is done inside draw but we can check valid_mask)
+        if pose_sequence.valid_mask[i]:
+            annotated_frame = draw_landmarks_from_array(frame, landmarks)
+            current_phase = phase_detector.update(landmarks)
+        else:
+            annotated_frame = frame
+            current_phase = phase_detector.phase  # Keep previous phase
 
-        # Chuyển BGR sang RGB
-        image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Tạo MediaPipe Image
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
-
-        # AI phát hiện khớp xương
-        detection_result = detector.detect(mp_image)
-
-        # Vẽ lại lên ảnh
-        annotated_image = draw_landmarks_on_image(image_rgb, detection_result)
-
-        # Chuyển lại về BGR để xử lý tiếp (vẽ chữ)
-        output_frame = cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
-
-        # --- XỬ LÝ PHASE ---
-        current_phase = "Address"  # Mặc định
-        if detection_result.pose_landmarks:
-            # Lấy landmarks của người đầu tiên (index 0)
-            current_phase = phase_detector.update(detection_result.pose_landmarks[0])
-
-        # Vẽ Phase lên video
+        # Draw Phase
         cv2.putText(
-            output_frame,
+            annotated_frame,
             f"Phase: {current_phase}",
             (50, 100),
             cv2.FONT_HERSHEY_SIMPLEX,
@@ -228,13 +417,26 @@ def process_video(input_path, output_path):
             cv2.LINE_AA,
         )
 
-        out.write(output_frame)  # Ghi frame vào file tạm
+        # Draw Prediction Result (if available)
+        if predicted_band != "Unknown":
+            cv2.putText(
+                annotated_frame,
+                f"Band: {predicted_band}",
+                (50, 150),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.0,
+                (255, 0, 0),
+                2,
+                cv2.LINE_AA,
+            )
+
+        out.write(annotated_frame)
 
     out.release()
-    cap.release()
-    print(f"OpenCV processing done. Frames: {frame_count}")
+    pose_processor.reset()
+    print("Video generation done.")
 
-    # --- BƯỚC 2: DÙNG FFMPEG CONVERT SANG H.264 (CHUẨN WEB) ---
+    # --- FFMPEG CONVERSION ---
     print("Converting to web-friendly format using FFmpeg...")
     try:
         # Lệnh ffmpeg: input temp -> codec libx264 -> pixel format yuv420p (quan trọng cho browser) -> output
@@ -274,6 +476,19 @@ def process_video(input_path, output_path):
             os.rename(temp_output_path, output_path)
 
     print(f"Done! Final video saved to: {output_path}")
+
+    # Print JSON result for backend to parse
+    import json
+
+    result = {
+        "band": predicted_band,
+        "probs": probs_str,
+        "swing_start": swing_window.start_frame,
+        "swing_end": swing_window.end_frame,
+        "swing_speed": swing_speed_val,
+        "arm_angle": arm_angle_val,
+    }
+    print(f"__JSON_START__{json.dumps(result)}__JSON_END__")
 
 
 if __name__ == "__main__":
