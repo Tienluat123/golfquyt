@@ -3,5 +3,3 @@ mediapipe
 numpy
 torch
 scipy
-flask
-flask-cors
