@@ -340,8 +340,8 @@ def process_video(input_path, output_path):
                     f"CORAL Prediction: Class {coral_pred_idx} ({config.ID_TO_BAND.get(coral_pred_idx)})"
                 )
 
-                # DECISION: Use CORAL head if available, as the model name suggests it's a Coral model
-                pred_idx = coral_pred_idx
+                # DECISION dùng Classification head (softmax)
+                pred_idx = cls_pred_idx
                 predicted_band = config.ID_TO_BAND.get(pred_idx, "Unknown")
 
                 # Use CLS probs for confidence display (optional, or derive from CORAL)
@@ -452,8 +452,6 @@ def process_video(input_path, output_path):
 
     print(f"Done! Final video saved to: {output_path}")
 
-    # Print JSON result for backend to parse
-    import json
 
     result = {
         "band": predicted_band,
