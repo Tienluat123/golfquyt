@@ -1,103 +1,124 @@
 # Golf Quyt Analyzer
 
-AI-powered golf swing analysis application. This tool uses computer vision to analyze golf swings from video uploads, providing metrics like swing speed, arm angle, and handicap band prediction.
+> **AI-Powered Golf Swing Analysis Application**
+>
+> This tool leverages computer vision to analyze golf swings from video uploads, providing detailed metrics like swing speed, arm angle, and handicap band prediction.
 
-## Prerequisites
+---
 
-Before running the project, ensure you have the following installed:
+## Features
 
-- Node.js (v16 or higher)
-- Python (v3.8 or higher)
-- FFmpeg (Required for video processing)
+- **Automated Swing Detection**: Automatically identifies the swing sequence in a video.
+- **Pose Estimation**: Tracks key body joints throughout the swing.
+- **Metric Analysis**: Calculates swing speed (m/s) and arm angles.
+- **Handicap Prediction**: Uses AI to estimate the player's handicap band.
+- **Visual Feedback**: Generates an annotated video with skeleton overlays.
 
-## Installation
+---
 
-### 1. Clone the repository
+## System Requirements
+
+Before running the project, ensure your system meets the following requirements:
+
+- **Node.js**: v16 or higher
+- **Python**: v3.8 or higher
+- **FFmpeg**: Required for video processing (must be in system PATH)
+
+---
+
+## Installation Guide
+
+Follow these steps to set up the development environment.
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Tienluat123/golfquyt.git
 cd golfquyt
 ```
 
-### 2. Backend Setup
+### 2. Backend Configuration
 
-Navigate to the backend directory:
+Navigate to the backend directory and install dependencies.
+
+**Node.js Dependencies:**
 
 ```bash
 cd backend
-```
-
-Install Node.js dependencies:
-
-```bash
 npm install
 ```
 
-Install Python dependencies:
+**Python Environment:**
 
-It is recommended to use a virtual environment.
+It is highly recommended to use a virtual environment to manage Python dependencies.
 
 ```bash
 # Create virtual environment
 python3 -m venv venv
 
 # Activate virtual environment
-# On macOS/Linux:
+# macOS/Linux:
 source venv/bin/activate
-# On Windows:
+# Windows:
 # venv\Scripts\activate
 
-# Install requirements
+# Install required packages
 pip install -r requirements.txt
 ```
 
-**Important:** Ensure FFmpeg is installed and accessible in your system PATH.
+> **Note:** Ensure FFmpeg is installed.
+>
+> - **macOS**: `brew install ffmpeg`
+> - **Windows**: Download and add to PATH.
 
-- macOS: `brew install ffmpeg`
-- Windows: Download and add to PATH.
+### 3. Frontend Configuration
 
-### 3. Frontend Setup
-
-Navigate to the frontend directory:
+Navigate to the frontend directory and install dependencies.
 
 ```bash
 cd ../frontend
-```
-
-Install dependencies:
-
-```bash
 npm install
 ```
 
+---
+
 ## Running the Application
 
-You need to run both the backend and frontend servers.
+To run the full application, you need to start both the backend and frontend servers in separate terminal windows.
 
-### Start Backend
+### Step 1: Start Backend Server
 
-Open a terminal in the `backend` directory:
+From the `backend` directory:
 
 ```bash
-# Ensure your python virtual environment is activated if you used one
+# Ensure your python virtual environment is activated
 npm start
 ```
 
-The backend server will start on `http://localhost:5001`.
+_Server will start at: `http://localhost:5001`_
 
-### Start Frontend
+### Step 2: Start Frontend Client
 
-Open a new terminal in the `frontend` directory:
+From the `frontend` directory:
 
 ```bash
 npm run dev
 ```
 
-The frontend application will typically start on `http://localhost:5173`.
+_Application will be accessible at: `http://localhost:5173`_
 
-## Usage
+---
 
-1. Open your browser and navigate to the frontend URL.
-2. Upload a video of a golf swing.
-3. Wait for the AI to process the video.
-4. View the analysis results, including the annotated video and swing metrics.
+## Usage Instructions
+
+1.  Open your web browser and navigate to the frontend URL (usually `http://localhost:5173`).
+2.  Click the upload area to select a golf swing video from your computer.
+3.  Wait for the AI to process the video (this may take a few seconds depending on video length).
+4.  Review your analysis results, including the processed video playback and calculated metrics.
+
+---
+
+## Project Structure
+
+- **backend/**: Contains the Node.js server, Python processing scripts, and AI models.
+- **frontend/**: Contains the React application and UI components.
