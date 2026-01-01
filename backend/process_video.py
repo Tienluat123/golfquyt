@@ -1,59 +1,55 @@
-import cv2
-import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
-import numpy as np
 import sys
 import os
-import torch
 import json
 import subprocess
 from pathlib import Path
+import traceback
 
-# Import custom modules
+import cv2
+import numpy as np
+import torch
+import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+
+# Import local modules
 try:
+    import config
     from feature_engineering import FeatureEngineer
     from model_utils import load_model
     from pipeline.types import PoseSequence
     from pose_processing import PoseProcessor
     from video_processing import VideoProcessor
-    import config
 except ImportError as e:
-    print(f"Error importing modules: {e}")
+    print(f"Lỗi import modules: {e}")
     sys.exit(1)
 
 
-# Class quản lý trạng thái Phase (Đơn giản hóa)
 class GolfPhaseDetector:
+    """
+    Máy trạng thái đơn giản để xác định giai đoạn của cú swing.
+    Dựa trên vị trí tương đối của cổ tay (wrist) so với vai (shoulder) và hông (hip).
+    """
     def __init__(self):
         self.phase = "Address"
         self.state = 0
-        # 0: Address
-        # 1: Takeaway
-        # 2: Backswing
-        # 3: Top
-        # 4: Downswing
-        # 5: Impact
-        # 6: Follow Through
-        # 7: Finish
-        self.prev_wrist_y = None
-        self.min_wrist_y = 1.0  # Dùng để tìm Top (y nhỏ nhất)
+        # 0: Address, 1: Takeaway, 2: Backswing, 3: Top, 
+        # 4: Downswing, 5: Impact, 6: Follow Through, 7: Finish
+        self.min_wrist_y = 1.0  # Theo dõi điểm cao nhất của backswing
 
     def update(self, landmarks):
-        # landmarks: (33, 4) or list of NormalizedLandmark
+        # Lấy tọa độ y của các khớp quan trọng
+        # landmarks có thể là list hoặc numpy array
         if isinstance(landmarks, list):
-            # Convert list of NormalizedLandmark to numpy-like access if needed
-            # But here we just need .y access
             wrist_y = (landmarks[15].y + landmarks[16].y) / 2
             shoulder_y = (landmarks[11].y + landmarks[12].y) / 2
             hip_y = (landmarks[23].y + landmarks[24].y) / 2
         else:
-            # Numpy array (33, 4) [x, y, z, vis]
             wrist_y = (landmarks[15, 1] + landmarks[16, 1]) / 2
             shoulder_y = (landmarks[11, 1] + landmarks[12, 1]) / 2
             hip_y = (landmarks[23, 1] + landmarks[24, 1]) / 2
 
-        # Logic chuyển đổi trạng thái (Heuristic đơn giản)
+        # Logic chuyển trạng thái (Heuristic)
         if self.state == 0:  # Address
             if wrist_y < hip_y:
                 self.state = 1
@@ -89,142 +85,92 @@ class GolfPhaseDetector:
 
 
 def calculate_angle(a, b, c):
-    """Tính góc giữa 3 điểm (theo độ)"""
-    a = np.array(a)
-    b = np.array(b)
-    c = np.array(c)
-
-    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(
-        a[1] - b[1], a[0] - b[0]
-    )
+    """Tính góc giữa 3 điểm (độ)"""
+    a, b, c = np.array(a), np.array(b), np.array(c)
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
     angle = np.abs(radians * 180.0 / np.pi)
-
-    if angle > 180.0:
-        angle = 360 - angle
-
-    return angle
+    return 360 - angle if angle > 180.0 else angle
 
 
 def draw_landmarks_from_array(rgb_image, landmarks):
-    """Draw landmarks from (33, 4) numpy array."""
+    """Vẽ skeleton lên frame từ mảng numpy (33, 4)"""
     annotated_image = np.copy(rgb_image)
-    height, width, _ = annotated_image.shape
+    h, w, _ = annotated_image.shape
 
-    # Connections (BlazePose 33 keypoints)
+    # Định nghĩa các đường nối khớp (BlazePose)
     connections = [
-        (0, 1),
-        (1, 2),
-        (2, 3),
-        (3, 7),
-        (0, 4),
-        (4, 5),
-        (5, 6),
-        (6, 8),
-        (9, 10),
-        (11, 12),
-        (11, 13),
-        (13, 15),
-        (15, 17),
-        (15, 19),
-        (15, 21),
-        (17, 19),
-        (12, 14),
-        (14, 16),
-        (16, 18),
-        (16, 20),
-        (16, 22),
-        (18, 20),
-        (11, 23),
-        (12, 24),
-        (23, 24),
-        (23, 25),
-        (24, 26),
-        (25, 27),
-        (26, 28),
-        (27, 29),
-        (28, 30),
-        (29, 31),
-        (30, 32),
-        (27, 31),
-        (28, 32),
+        (0, 1), (1, 2), (2, 3), (3, 7), (0, 4), (4, 5), (5, 6), (6, 8),
+        (9, 10), (11, 12), (11, 13), (13, 15), (15, 17), (15, 19), (15, 21),
+        (17, 19), (12, 14), (14, 16), (16, 18), (16, 20), (16, 22), (18, 20),
+        (11, 23), (12, 24), (23, 24), (23, 25), (24, 26), (25, 27), (26, 28),
+        (27, 29), (28, 30), (29, 31), (30, 32), (27, 31), (28, 32),
     ]
 
-    # 1. Convert coordinates
-    pixel_landmarks = []
-    for i in range(landmarks.shape[0]):
-        lm = landmarks[i]
-        px = int(lm[0] * width)
-        py = int(lm[1] * height)
-        pixel_landmarks.append((px, py))
+    # Chuyển đổi tọa độ chuẩn hóa sang pixel
+    px_landmarks = [(int(lm[0] * w), int(lm[1] * h)) for lm in landmarks]
 
-    # 2. Color logic
-    joint_colors = [(67, 70, 0)] * len(pixel_landmarks)
+    # Tô màu khớp: Mặc định vàng, tay trái đổi màu theo độ thẳng
+    joint_colors = [(67, 70, 0)] * len(px_landmarks)
+    
+    if len(px_landmarks) > 15:
+        # Kiểm tra tay trái thẳng (Left Arm Straight)
+        left_arm_angle = calculate_angle(px_landmarks[11], px_landmarks[13], px_landmarks[15])
+        # Xanh lá nếu thẳng (>160 độ), Đỏ nếu cong
+        status_color = (0, 255, 0) if left_arm_angle > 160 else (0, 0, 255)
+        for idx in [11, 13, 15]:
+            joint_colors[idx] = status_color
 
-    if len(pixel_landmarks) > 15:
-        left_arm_angle = calculate_angle(
-            pixel_landmarks[11], pixel_landmarks[13], pixel_landmarks[15]
-        )
-        color_status = (0, 255, 0) if left_arm_angle > 160 else (0, 0, 255)
-        joint_colors[11] = color_status
-        joint_colors[13] = color_status
-        joint_colors[15] = color_status
+    if px_landmarks:
+        joint_colors[0] = (255, 0, 255) # Đầu mũi màu tím
 
-    if len(pixel_landmarks) > 0:
-        joint_colors[0] = (255, 0, 255)
+    # Vẽ đường nối
+    for start, end in connections:
+        if start < len(px_landmarks) and end < len(px_landmarks):
+            cv2.line(annotated_image, px_landmarks[start], px_landmarks[end], (96, 188, 249), 3)
 
-    # 3. Draw connections
-    for start_idx, end_idx in connections:
-        if start_idx < len(pixel_landmarks) and end_idx < len(pixel_landmarks):
-            start_point = pixel_landmarks[start_idx]
-            end_point = pixel_landmarks[end_idx]
-            cv2.line(annotated_image, start_point, end_point, (96, 188, 249), 3)
-
-    # 4. Draw joints
-    for i, (px, py) in enumerate(pixel_landmarks):
-        color = joint_colors[i]
-        cv2.circle(annotated_image, (px, py), 6, color, -1)
+    # Vẽ khớp
+    for i, (px, py) in enumerate(px_landmarks):
+        cv2.circle(annotated_image, (px, py), 6, joint_colors[i], -1)
         cv2.circle(annotated_image, (px, py), 2, (255, 255, 255), -1)
 
     return annotated_image
 
 
 def process_video(input_path, output_path):
-    print(f"Processing video: {input_path}")
+    print(f"🚀 Bắt đầu xử lý video: {input_path}")
 
-    # Initialize Processors
+    # Khởi tạo các bộ xử lý
     video_processor = VideoProcessor(target_fps=config.TARGET_FPS)
     pose_processor = PoseProcessor()
     feature_engineer = FeatureEngineer()
 
-    # Load AI Model
+    # Load Model AI
     model_path = os.path.join("models", "coral_ordinal_model_20260102_001311.pth")
+    ai_model = None
     try:
         ai_model = load_model(model_path)
-        print("AI Model loaded successfully!")
+        print("✅ AI Model đã sẵn sàng!")
     except Exception as e:
-        print(f"Failed to load AI Model: {e}")
-        ai_model = None
+        print(f"⚠️ Không thể load AI Model: {e}")
 
-    # 1. Load and Resample Video
+    # --- BƯỚC 1: Tải và chuẩn hóa video ---
     try:
-        print("Loading and resampling video...")
+        print("... Đang đọc và resample video")
         video_clip = video_processor.load_and_resample(Path(input_path))
     except Exception as e:
-        print(f"Error loading video: {e}")
+        print(f"❌ Lỗi đọc video: {e}")
         sys.exit(1)
 
-    # 2. Extract Pose Sequence
-    print("Extracting pose sequence...")
+    # --- BƯỚC 2: Trích xuất xương (Pose Extraction) ---
+    print("... Đang trích xuất chuyển động (Pose)")
     pose_sequence = pose_processor.extract_sequence(video_clip.frames, video_clip.fps)
 
-    # 3. Detect Swing Window (Optional but recommended for AI)
-    print("Detecting swing window...")
+    # --- BƯỚC 3: Xác định khoảng Swing ---
+    print("... Đang tìm cú swing")
     swing_window = video_processor.detect_swing_window(pose_sequence)
-    print(
-        f"Swing window detected: Frame {swing_window.start_frame} to {swing_window.end_frame}"
-    )
+    print(f"   -> Swing tìm thấy từ frame {swing_window.start_frame} đến {swing_window.end_frame}")
 
-    # 4. AI Prediction
+    # --- BƯỚC 4: Dự đoán AI & Tính chỉ số ---
     predicted_band = "Unknown"
     probs_str = ""
     swing_speed_val = 0.0
@@ -232,245 +178,166 @@ def process_video(input_path, output_path):
 
     if ai_model:
         try:
-            print("Running AI Prediction...")
-            # Slice sequence to swing window
-            # Note: We need to handle if window is invalid or too short
-            start = swing_window.start_frame
-            end = swing_window.end_frame
-            if end - start < 10:  # Too short, use full video
-                start = 0
-                end = len(pose_sequence.data)
+            print("... Đang chạy AI phân tích")
+            
+            # Cắt sequence theo swing window
+            start, end = swing_window.start_frame, swing_window.end_frame
+            if end - start < 10: # Nếu quá ngắn thì lấy cả video
+                start, end = 0, len(pose_sequence.data)
 
-            sliced_data = pose_sequence.data[start:end]
-            sliced_mask = pose_sequence.interpolation_mask[start:end]
-            sliced_valid = pose_sequence.valid_mask[start:end]
-            sliced_times = pose_sequence.frame_times[start:end]
-
+            # Tạo sequence con cho vùng swing
             sliced_seq = PoseSequence(
-                data=sliced_data,
-                frame_times=sliced_times,
+                data=pose_sequence.data[start:end],
+                frame_times=pose_sequence.frame_times[start:end],
                 fps=pose_sequence.fps,
-                interpolation_mask=sliced_mask,
-                valid_mask=sliced_valid,
+                interpolation_mask=pose_sequence.interpolation_mask[start:end],
+                valid_mask=pose_sequence.valid_mask[start:end],
             )
 
-            # Prepare for Model (Normalize & Resample)
-            processed_seq, _ = pose_processor.prepare_sequence(sliced_seq)
-
-            # --- Calculate Metrics for Frontend (Using Non-Resampled Data) ---
-            # We use the original sliced_seq to avoid time warping issues from resampling
-            # But we must apply Spatial Normalization to get "Hip Width" units
+            # --- TÍNH TOÁN CHỈ SỐ (Metrics) ---
+            # Lưu ý: Tính trên dữ liệu gốc (chưa resample) để đảm bảo vận tốc đúng thực tế
             try:
-                # 1. Interpolate & Smooth (copy logic from prepare_sequence)
+                # 1. Làm mượt & Chuẩn hóa không gian (để có đơn vị Hip Width)
                 metrics_data, _ = pose_processor._interpolate(sliced_seq.data)
                 metrics_data = pose_processor._smooth(metrics_data)
-                
-                # 2. Spatial Normalize (Crucial for Hip Width units)
                 metrics_data = pose_processor._spatial_normalize(metrics_data)
                 
-                # 3. Create temp sequence for feature extraction
+                # 2. Tạo sequence tạm để tính features
                 metrics_seq = PoseSequence(
                     data=metrics_data,
                     frame_times=sliced_seq.frame_times,
                     fps=sliced_seq.fps,
-                    interpolation_mask=sliced_seq.interpolation_mask, # Approximate
+                    interpolation_mask=sliced_seq.interpolation_mask,
                     valid_mask=sliced_seq.valid_mask
                 )
                 
-                # 4. Compute Features
+                # 3. Tính features
                 m_joint_feats, m_global_feats = feature_engineer.compute_features(metrics_seq)
                 
-                # 5. Extract Metrics
-                # Swing Speed: Convert Hip Widths/s -> m/s (Approx 1 HW = 0.35m)
+                # 4. Trích xuất chỉ số
+                # Vận tốc: Đổi từ Hip Widths/s -> m/s (Giả định 1 HW = 0.35m)
+                # Dùng percentile 95 để loại bỏ nhiễu
                 raw_speed = np.percentile(m_global_feats[:, 2], 95)
                 swing_speed_val = float(raw_speed * 0.35) 
                 
-                # Arm Angle
+                # Góc tay: Max Left Elbow Angle
                 arm_angle_val = float(np.max(m_joint_feats[:, 13, 12]))
                 
-                print(f"Metrics Calculated: Speed={swing_speed_val:.2f} m/s, Angle={arm_angle_val:.1f}")
+                print(f"   -> Chỉ số: Tốc độ={swing_speed_val:.2f} m/s, Góc tay={arm_angle_val:.1f}°")
                 
             except Exception as e:
-                print(f"Error calculating metrics: {e}")
-                swing_speed_val = 0.0
-                arm_angle_val = 0.0
+                print(f"⚠️ Lỗi tính chỉ số: {e}")
 
-            # Feature Engineering for AI (on processed_seq)
+            # --- CHUẨN BỊ DỮ LIỆU CHO AI ---
+            # Normalize & Resample theo chuẩn training
+            processed_seq, _ = pose_processor.prepare_sequence(sliced_seq)
             joint_feats, global_feats = feature_engineer.compute_features(processed_seq)
 
-            # --- Calculate Metrics for Frontend (Before Normalization) ---
-            # (REMOVED OLD CALCULATION)
-
-            # Check for Scaler and Normalize
-            scaler_path = (
-                config.OUTPUT_ROOT
-                / config.FINAL_FEATURE_SUBDIR
-                / config.SCALER_FILENAME
-            )
-
+            # Load Scaler (Chuẩn hóa dữ liệu đầu vào model)
+            scaler_path = config.OUTPUT_ROOT / config.FINAL_FEATURE_SUBDIR / config.SCALER_FILENAME
             if scaler_path.exists():
-                print(f"Loading scaler from {scaler_path}...")
                 try:
                     with open(scaler_path, "r") as f:
                         scaler_data = json.load(f)
-
-                    # Extract means and stds
+                    
+                    # Áp dụng Standard Scaling
                     j_mean = np.array(scaler_data["joint_mean"], dtype=np.float32)
                     j_std = np.array(scaler_data["joint_std"], dtype=np.float32)
                     g_mean = np.array(scaler_data["global_mean"], dtype=np.float32)
                     g_std = np.array(scaler_data["global_std"], dtype=np.float32)
-
-                    # Handle zero std
+                    
+                    # Tránh chia cho 0
                     j_std[j_std == 0] = 1.0
                     g_std[g_std == 0] = 1.0
 
-                    # Apply Scaling
                     joint_feats = (joint_feats - j_mean) / j_std
                     global_feats = (global_feats - g_mean) / g_std
-
-                    print("Applied Standard Scaling from feature_scaler.json.")
                 except Exception as e:
-                    print(f"ERROR loading/applying scaler: {e}")
+                    print(f"⚠️ Lỗi scaler: {e}")
             else:
-                print(f"WARNING: Scaler file not found at {scaler_path}!")
-                print(
-                    "WARNING: Model is receiving unscaled data. Predictions will be unreliable."
-                )
+                print("⚠️ Cảnh báo: Không tìm thấy file scaler!")
 
+            # Inference (Dự đoán)
             # Flatten joint features: (T, 33, 13) -> (T, 429)
             T, J, D = joint_feats.shape
-            joint_feats_flat = joint_feats.reshape(T, J * D)
-
-            # Inference
-            joint_tensor = torch.from_numpy(joint_feats_flat).unsqueeze(
-                0
-            )  # (1, T, 429)
-            global_tensor = torch.from_numpy(global_feats).unsqueeze(0)  # (1, T, 3)
+            joint_tensor = torch.from_numpy(joint_feats.reshape(T, J * D)).unsqueeze(0)
+            global_tensor = torch.from_numpy(global_feats).unsqueeze(0)
 
             with torch.no_grad():
                 coral_logits, cls_logits = ai_model(joint_tensor, global_tensor)
-
-                # 1. Classification Head Prediction
+                
+                # Lấy kết quả từ Classification Head
                 probs = torch.softmax(cls_logits, dim=1)
-                cls_pred_idx = torch.argmax(probs, dim=1).item()
-
-                # 2. CORAL Head Prediction
-                # coral_logits: (B, num_classes - 1)
-                # Sigmoid gives P(y > k)
-                coral_probs = torch.sigmoid(coral_logits)
-                # Count how many thresholds are crossed (prob > 0.5)
-                coral_pred_idx = torch.sum(coral_probs > 0.5, dim=1).item()
-
-                # DECISION dùng Classification head (softmax)
-                pred_idx = cls_pred_idx
+                pred_idx = torch.argmax(probs, dim=1).item()
+                
                 predicted_band = config.ID_TO_BAND.get(pred_idx, "Unknown")
-
-                # Use CLS probs for confidence display (optional, or derive from CORAL)
                 probs_str = str(probs.numpy()[0])
+                
+                print(f"   -> Kết quả AI: Band {predicted_band}")
 
         except Exception as e:
-            print(f"AI Prediction Error: {e}")
-            import traceback
-
+            print(f"❌ Lỗi AI Prediction: {e}")
             traceback.print_exc()
-    else:
-        print("AI Model is None. Skipping prediction.")
 
-    # 5. Generate Output Video
-    print("Generating output video...")
-    height, width, _ = video_clip.frames[0].shape
-
-    temp_output_path = output_path + ".temp.mp4"
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter(temp_output_path, fourcc, video_clip.fps, (width, height))
+    # --- BƯỚC 5: Vẽ Overlay & Xuất Video ---
+    print("... Đang vẽ overlay và xuất video")
+    h, w, _ = video_clip.frames[0].shape
+    temp_output = output_path + ".temp.mp4"
+    
+    # Init Video Writer
+    out = cv2.VideoWriter(
+        temp_output, 
+        cv2.VideoWriter_fourcc(*"mp4v"), 
+        video_clip.fps, 
+        (w, h)
+    )
 
     phase_detector = GolfPhaseDetector()
 
     for i, frame in enumerate(video_clip.frames):
-        # Get landmarks for this frame
-        landmarks = pose_sequence.data[i]  # (33, 4)
-
-        # Draw landmarks
-        # Only draw if valid (visibility check is done inside draw but we can check valid_mask)
+        landmarks = pose_sequence.data[i]
+        
+        # Vẽ skeleton & Phase nếu frame hợp lệ
         if pose_sequence.valid_mask[i]:
             annotated_frame = draw_landmarks_from_array(frame, landmarks)
             current_phase = phase_detector.update(landmarks)
         else:
             annotated_frame = frame
-            current_phase = phase_detector.phase  # Keep previous phase
+            current_phase = phase_detector.phase
 
-        # Draw Phase
-        cv2.putText(
-            annotated_frame,
-            f"Phase: {current_phase}",
-            (50, 100),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1.5,
-            (0, 0, 255),
-            3,
-            cv2.LINE_AA,
-        )
+        # Vẽ thông tin lên frame
+        cv2.putText(annotated_frame, f"Phase: {current_phase}", (50, 100), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
 
-        # Draw Prediction Result (if available)
         if predicted_band != "Unknown":
-            cv2.putText(
-                annotated_frame,
-                f"Band: {predicted_band}",
-                (50, 150),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (255, 0, 0),
-                2,
-                cv2.LINE_AA,
-            )
+            cv2.putText(annotated_frame, f"Band: {predicted_band}", (50, 150), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 2, cv2.LINE_AA)
 
         out.write(annotated_frame)
 
     out.release()
     pose_processor.reset()
-    print("Video generation done.")
 
-    # --- FFMPEG CONVERSION ---
-    print("Converting to web-friendly format using FFmpeg...")
+    # --- BƯỚC 6: Convert sang định dạng Web (FFmpeg) ---
+    print("... Đang tối ưu video cho web (FFmpeg)")
     try:
-        # Lệnh ffmpeg: input temp -> codec libx264 -> pixel format yuv420p (quan trọng cho browser) -> output
-        # -y: overwrite output file
-        # -preset fast: convert nhanh
-        subprocess.run(
-            [
-                "ffmpeg",
-                "-y",
-                "-i",
-                temp_output_path,
-                "-vcodec",
-                "libx264",
-                "-pix_fmt",
-                "yuv420p",
-                "-preset",
-                "fast",
-                output_path,
-            ],
-            check=True,
-        )
+        subprocess.run([
+            "ffmpeg", "-y", "-i", temp_output,
+            "-vcodec", "libx264", "-pix_fmt", "yuv420p", "-preset", "fast",
+            output_path
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) # Ẩn log ffmpeg cho gọn
+        
+        if os.path.exists(temp_output):
+            os.remove(temp_output)
+            
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("⚠️ FFmpeg lỗi hoặc không tìm thấy, dùng file gốc.")
+        if os.path.exists(temp_output):
+            os.rename(temp_output, output_path)
 
-        print("FFmpeg conversion successful!")
+    print(f"✅ Hoàn tất! Video đã lưu tại: {output_path}")
 
-        # Xóa file tạm
-        if os.path.exists(temp_output_path):
-            os.remove(temp_output_path)
-
-    except subprocess.CalledProcessError as e:
-        print(f"FFmpeg failed: {e}")
-        # Nếu ffmpeg lỗi, đổi tên file tạm thành file chính để dùng tạm
-        if os.path.exists(temp_output_path):
-            os.rename(temp_output_path, output_path)
-    except FileNotFoundError:
-        print("FFmpeg not found. Using original OpenCV output.")
-        if os.path.exists(temp_output_path):
-            os.rename(temp_output_path, output_path)
-
-    print(f"Done! Final video saved to: {output_path}")
-
+    # In kết quả JSON để Node.js đọc
     result = {
         "band": predicted_band,
         "probs": probs_str,
@@ -484,10 +351,7 @@ def process_video(input_path, output_path):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python process_video.py <input_path> <output_path>")
+        print("Usage: python process_video.py <input> <output>")
         sys.exit(1)
-
-    input_video = sys.argv[1]
-    output_video = sys.argv[2]
-
-    process_video(input_video, output_video)
+    
+    process_video(sys.argv[1], sys.argv[2])
