@@ -261,8 +261,8 @@ def process_video(input_path, output_path):
             joint_feats, global_feats = feature_engineer.compute_features(processed_seq)
 
             # --- Calculate Metrics for Frontend (Before Normalization) ---
-            # 1. Swing Speed (Max Wrist Speed)
-            swing_speed_val = float(np.max(global_feats[:, 2]))
+            # 1. Swing Speed (Max Wrist Speed) - Use 95th percentile to ignore outliers
+            swing_speed_val = float(np.percentile(global_feats[:, 2], 95))
 
             # 2. Arm Angle (Max Left Elbow Angle)
             arm_angle_val = float(np.max(joint_feats[:, 13, 12]))
