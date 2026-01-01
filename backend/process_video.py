@@ -267,8 +267,6 @@ def process_video(input_path, output_path):
             # 2. Arm Angle (Max Left Elbow Angle)
             arm_angle_val = float(np.max(joint_feats[:, 13, 12]))
 
-            print(f"DEBUG: Swing Speed={swing_speed_val}, Arm Angle={arm_angle_val}")
-
             # Check for Scaler and Normalize
             scaler_path = (
                 config.OUTPUT_ROOT
@@ -318,10 +316,6 @@ def process_video(input_path, output_path):
             with torch.no_grad():
                 coral_logits, cls_logits = ai_model(joint_tensor, global_tensor)
 
-                # --- Debugging Outputs ---
-                print(f"Raw CLS Logits: {cls_logits.numpy()}")
-                print(f"Raw CORAL Logits: {coral_logits.numpy()}")
-
                 # 1. Classification Head Prediction
                 probs = torch.softmax(cls_logits, dim=1)
                 cls_pred_idx = torch.argmax(probs, dim=1).item()
@@ -333,21 +327,12 @@ def process_video(input_path, output_path):
                 # Count how many thresholds are crossed (prob > 0.5)
                 coral_pred_idx = torch.sum(coral_probs > 0.5, dim=1).item()
 
-                print(
-                    f"CLS Prediction: Class {cls_pred_idx} ({config.ID_TO_BAND.get(cls_pred_idx)})"
-                )
-                print(
-                    f"CORAL Prediction: Class {coral_pred_idx} ({config.ID_TO_BAND.get(coral_pred_idx)})"
-                )
-
                 # DECISION dùng Classification head (softmax)
                 pred_idx = cls_pred_idx
                 predicted_band = config.ID_TO_BAND.get(pred_idx, "Unknown")
 
                 # Use CLS probs for confidence display (optional, or derive from CORAL)
                 probs_str = str(probs.numpy()[0])
-
-                print(f"FINAL AI PREDICTION: Band {predicted_band} (Class {pred_idx})")
 
         except Exception as e:
             print(f"AI Prediction Error: {e}")
@@ -451,7 +436,6 @@ def process_video(input_path, output_path):
             os.rename(temp_output_path, output_path)
 
     print(f"Done! Final video saved to: {output_path}")
-
 
     result = {
         "band": predicted_band,

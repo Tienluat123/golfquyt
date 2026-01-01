@@ -24,7 +24,7 @@ exports.analyzeVideo = (req, res) => {
   // Lắng nghe log từ Python (để debug)
   pythonProcess.stdout.on('data', (data) => {
     const str = data.toString();
-    console.log(`Python stdout: ${str}`);
+    // console.log(`Python stdout: ${str}`);
     pythonOutput += str;
   });
 
@@ -48,8 +48,8 @@ exports.analyzeVideo = (req, res) => {
         const match = pythonOutput.match(/__JSON_START__(.*)__JSON_END__/s);
         if (match && match[1]) {
           analysisResult = JSON.parse(match[1]);
-          console.log('Parsed Analysis Result:', analysisResult);
-          console.log('Metrics - Speed:', analysisResult.swing_speed, 'Angle:', analysisResult.arm_angle);
+          // console.log('Parsed Analysis Result:', analysisResult);
+          // console.log('Metrics - Speed:', analysisResult.swing_speed, 'Angle:', analysisResult.arm_angle);
         }
       } catch (e) {
         console.error('Error parsing Python JSON output:', e);
