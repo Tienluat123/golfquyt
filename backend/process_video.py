@@ -257,15 +257,49 @@ def process_video(input_path, output_path):
             # Prepare for Model (Normalize & Resample)
             processed_seq, _ = pose_processor.prepare_sequence(sliced_seq)
 
-            # Feature Engineering
+            # --- Calculate Metrics for Frontend (Using Non-Resampled Data) ---
+            # We use the original sliced_seq to avoid time warping issues from resampling
+            # But we must apply Spatial Normalization to get "Hip Width" units
+            try:
+                # 1. Interpolate & Smooth (copy logic from prepare_sequence)
+                metrics_data, _ = pose_processor._interpolate(sliced_seq.data)
+                metrics_data = pose_processor._smooth(metrics_data)
+                
+                # 2. Spatial Normalize (Crucial for Hip Width units)
+                metrics_data = pose_processor._spatial_normalize(metrics_data)
+                
+                # 3. Create temp sequence for feature extraction
+                metrics_seq = PoseSequence(
+                    data=metrics_data,
+                    frame_times=sliced_seq.frame_times,
+                    fps=sliced_seq.fps,
+                    interpolation_mask=sliced_seq.interpolation_mask, # Approximate
+                    valid_mask=sliced_seq.valid_mask
+                )
+                
+                # 4. Compute Features
+                m_joint_feats, m_global_feats = feature_engineer.compute_features(metrics_seq)
+                
+                # 5. Extract Metrics
+                # Swing Speed: Convert Hip Widths/s -> m/s (Approx 1 HW = 0.35m)
+                raw_speed = np.percentile(m_global_feats[:, 2], 95)
+                swing_speed_val = float(raw_speed * 0.35) 
+                
+                # Arm Angle
+                arm_angle_val = float(np.max(m_joint_feats[:, 13, 12]))
+                
+                print(f"Metrics Calculated: Speed={swing_speed_val:.2f} m/s, Angle={arm_angle_val:.1f}")
+                
+            except Exception as e:
+                print(f"Error calculating metrics: {e}")
+                swing_speed_val = 0.0
+                arm_angle_val = 0.0
+
+            # Feature Engineering for AI (on processed_seq)
             joint_feats, global_feats = feature_engineer.compute_features(processed_seq)
 
             # --- Calculate Metrics for Frontend (Before Normalization) ---
-            # 1. Swing Speed (Max Wrist Speed) - Use 95th percentile to ignore outliers
-            swing_speed_val = float(np.percentile(global_feats[:, 2], 95))
-
-            # 2. Arm Angle (Max Left Elbow Angle)
-            arm_angle_val = float(np.max(joint_feats[:, 13, 12]))
+            # (REMOVED OLD CALCULATION)
 
             # Check for Scaler and Normalize
             scaler_path = (
