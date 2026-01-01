@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import os
 import torch
+import json
 import subprocess
 from pathlib import Path
 
@@ -259,36 +260,7 @@ def process_video(input_path, output_path):
             # Feature Engineering
             joint_feats, global_feats = feature_engineer.compute_features(processed_seq)
 
-            # --- DEBUG: Check Feature Ranges ---
-            print(
-                f"DEBUG: Joint Feats Range: Min={joint_feats.min():.3f}, Max={joint_feats.max():.3f}, Mean={joint_feats.mean():.3f}"
-            )
-            print(
-                f"DEBUG: Global Feats Range: Min={global_feats.min():.3f}, Max={global_feats.max():.3f}, Mean={global_feats.mean():.3f}"
-            )
-
-            # Check for Scaler
-            scaler_path = (
-                config.OUTPUT_ROOT
-                / config.FINAL_FEATURE_SUBDIR
-                / config.SCALER_FILENAME
-            )
-            if scaler_path.exists():
-                print(f"Loading scaler from {scaler_path}...")
-                with open(scaler_path, "r") as f:
-                    scaler_data = json.load(f)
-                # Apply scaling (Simplified implementation)
-                # Note: This requires matching dimensions exactly.
-                # If scaler is missing, we are feeding raw data to a model that expects scaled data.
-                # This is likely why predictions are stuck.
-                pass
-            else:
-                print(f"WARNING: Scaler file not found at {scaler_path}!")
-                print(
-                    "WARNING: Model is receiving unscaled data. Predictions may be unreliable (stuck)."
-                )
-
-            # --- Calculate Metrics for Frontend ---
+            # --- Calculate Metrics for Frontend (Before Normalization) ---
             # 1. Swing Speed (Max Wrist Speed)
             swing_speed_val = float(np.max(global_feats[:, 2]))
 
@@ -296,41 +268,42 @@ def process_video(input_path, output_path):
             arm_angle_val = float(np.max(joint_feats[:, 13, 12]))
 
             print(f"DEBUG: Swing Speed={swing_speed_val}, Arm Angle={arm_angle_val}")
-            # --------------------------------------
 
-            # --- HEURISTIC NORMALIZATION (CRITICAL FIX) ---
-            # The model expects normalized inputs (mean 0, std 1).
-            # Since feature_scaler.json is missing, we apply domain-knowledge scaling.
-            # This prevents large values (like Angles ~180) from saturating the model.
+            # Check for Scaler and Normalize
+            scaler_path = (
+                config.OUTPUT_ROOT
+                / config.FINAL_FEATURE_SUBDIR
+                / config.SCALER_FILENAME
+            )
 
-            # 1. Angles (Index 12 in joint_feats, Index 0 in global_feats)
-            # Map 0..180 -> -2..2 approx (Mean 90, Std 45)
-            joint_feats[..., 12] = (joint_feats[..., 12] - 90.0) / 45.0
-            global_feats[..., 0] = (
-                global_feats[..., 0] - 45.0
-            ) / 20.0  # X-Factor usually smaller
+            if scaler_path.exists():
+                print(f"Loading scaler from {scaler_path}...")
+                try:
+                    with open(scaler_path, "r") as f:
+                        scaler_data = json.load(f)
 
-            # 2. Coordinates (Index 0-2) - Already roughly -0.5 to 0.5
-            # Scale up slightly to match unit variance
-            joint_feats[..., 0:3] /= 0.3
+                    # Extract means and stds
+                    j_mean = np.array(scaler_data["joint_mean"], dtype=np.float32)
+                    j_std = np.array(scaler_data["joint_std"], dtype=np.float32)
+                    g_mean = np.array(scaler_data["global_mean"], dtype=np.float32)
+                    g_std = np.array(scaler_data["global_std"], dtype=np.float32)
 
-            # 3. Velocities (Index 4-6, 10) - Usually small (< 0.1 per frame)
-            # Scale up to make them visible
-            joint_feats[..., 4:7] /= 0.05
-            joint_feats[..., 10:11] /= 0.05
+                    # Handle zero std
+                    j_std[j_std == 0] = 1.0
+                    g_std[g_std == 0] = 1.0
 
-            # 4. Accelerations (Index 7-9, 11) - Very small
-            joint_feats[..., 7:10] /= 0.01
-            joint_feats[..., 11:12] /= 0.01
+                    # Apply Scaling
+                    joint_feats = (joint_feats - j_mean) / j_std
+                    global_feats = (global_feats - g_mean) / g_std
 
-            # 5. Global Extras
-            # Hip-Shoulder Sep (Index 1)
-            global_feats[..., 1] /= 0.1
-            # Wrist Speed (Index 2)
-            global_feats[..., 2] /= 0.05
-
-            print("Applied Heuristic Normalization to inputs.")
-            # ----------------------------------------------
+                    print("Applied Standard Scaling from feature_scaler.json.")
+                except Exception as e:
+                    print(f"ERROR loading/applying scaler: {e}")
+            else:
+                print(f"WARNING: Scaler file not found at {scaler_path}!")
+                print(
+                    "WARNING: Model is receiving unscaled data. Predictions will be unreliable."
+                )
 
             # Flatten joint features: (T, 33, 13) -> (T, 429)
             T, J, D = joint_feats.shape
@@ -381,6 +354,8 @@ def process_video(input_path, output_path):
             import traceback
 
             traceback.print_exc()
+    else:
+        print("AI Model is None. Skipping prediction.")
 
     # 5. Generate Output Video
     print("Generating output video...")
