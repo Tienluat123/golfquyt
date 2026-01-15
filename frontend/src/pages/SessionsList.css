@@ -1,0 +1,185 @@
+/* Sessions List Page */
+.sessions-list-container {
+  padding: 60px 50px 40px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.sessions-list-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 53px;
+  font-weight: 700;
+  color: #075b1f;
+  margin: 0 0 50px 0;
+  line-height: normal;
+}
+
+.sessions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 10px 0;
+  align-content: flex-start;
+}
+
+/* Session Card */
+.session-card-item {
+  width: 295px;
+  background: #9cbc12;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.session-card-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
+}
+
+/* Add Session Card */
+.add-session-card {
+  background: #b4c860;
+  height: 317px;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+}
+
+.add-session-card:hover {
+  background: #a5b655;
+}
+
+.add-session-icon {
+  font-size: 55px;
+  color: #000000;
+  opacity: 0.8;
+}
+
+/* Session Image */
+.session-card-image {
+  width: 255px;
+  height: 147px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.session-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Session Header */
+.session-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.session-card-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  line-height: normal;
+  flex: 1;
+}
+
+.session-options-btn {
+  background: none;
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.session-options-btn:hover {
+  opacity: 0.7;
+}
+
+/* Session Info */
+.session-card-time,
+.session-card-videos {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  line-height: normal;
+}
+
+/* Session Stats */
+.session-card-stats {
+  display: flex;
+  gap: 15px;
+  padding: 5px 0;
+  margin-top: 11px;
+}
+
+.session-stat-badge {
+  background: #075b1f;
+  border-radius: 5px;
+  padding: 5px 20px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* Loading */
+.loading-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .sessions-list-container {
+    padding: 40px 30px;
+  }
+
+  .sessions-list-title {
+    font-size: 42px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sessions-list-container {
+    padding: 30px 20px;
+  }
+
+  .sessions-list-title {
+    font-size: 36px;
+  }
+
+  .session-card-item,
+  .add-session-card {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .sessions-grid {
+    justify-content: center;
+  }
+}

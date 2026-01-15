@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaBookOpen } from 'react-icons/fa'; // Bỏ FaRegSadTear vì không dùng nữa
+import { FaPlus, FaMapMarkerAlt, FaEllipsisH, FaFlag } from 'react-icons/fa';
 import { getUserProfile } from '../services/user.service';
 import { getRecentSessions } from '../services/session.service';
 import { getFeaturedCourses } from '../services/course.service';
-import DashboardHeader from './Dashboard/DashboardHeader';
-import ProgressCard from './Dashboard/ProgressCard';
-import SessionCard from './Dashboard/SessionCard';
-import CourseCard from './Dashboard/CourseCard';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -29,7 +25,7 @@ const Dashboard = () => {
         setSessions(sessionData || []); 
         setCourses(courseData || []);
       } catch (error) {
-        console.error("Lỗi:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -37,62 +33,183 @@ const Dashboard = () => {
     fetchData();
   }, [navigate]);
 
-  if (loading) return <div className="loading-screen">Đang tải dữ liệu...</div>;
-  if (!user) return null;
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="loading-screen">Loading...</div>
+      </div>
+    );
+  }
+
+  const userName = user?.name || 'Alex Nguyen';
+  const userLocation = user?.location || 'Ho Chi Minh city, Vietnam';
 
   return (
-    <div className="dashboard-page">
-      <DashboardHeader user={user} />
-      <ProgressCard user={user} />
+    <div className="dashboard-container">
+      {/* Header Section */}
+      <div className="dashboard-header-section">
+        <div className="header-content">
+          <h1 className="greeting">Hello, {userName}!</h1>
+          <div className="location-wrapper">
+            <div className="location-info">
+              <FaMapMarkerAlt className="location-icon" />
+              <span className="location-text">{userLocation}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* --- GOLF SESSION (ĐÃ SỬA) --- */}
+      {/* Progress Card - Master of Golf */}
+      <div className="progress-section">
+        <div className="progress-card">
+          <h2 className="progress-title">Master of Golf</h2>
+          <div className="progress-bar-wrapper">
+            <div className="progress-bar-container">
+              <div className="progress-segment red"></div>
+              <div className="progress-segment orange"></div>
+              <div className="progress-segment yellow">
+                <div className="flag-marker">
+                  <FaFlag className="flag-icon" />
+                </div>
+              </div>
+              <div className="progress-segment green"></div>
+              <div className="progress-segment blue"></div>
+              <div className="progress-segment purple"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Golf Session Section */}
       <section className="section-block">
-        <h3>Golf Session</h3>
-        
-        {/* LUÔN HIỆN GRID, KHÔNG DÙNG IF/ELSE NỮA */}
+        <h3 className="section-title">Golf Session</h3>
         <div className="card-grid">
-          
-          {/* 1. THẺ ADD CARD (Luôn đứng đầu tiên) */}
-          <div className="card add-card" onClick={() => navigate('/sessions/create')}>
-            {/* Tăng size icon lên 40 cho đẹp và bỏ chữ New Session để giống thiết kế */}
-            <FaPlus size={40} /> 
+          {/* Add New Session Card */}
+          <div className="session-card add-card" onClick={() => navigate('/sessions/create')}>
+            <div className="add-icon-wrapper">
+              <FaPlus className="add-icon" />
+            </div>
           </div>
 
-          {/* 2. DANH SÁCH SESSION (Nếu có thì hiện tiếp theo) */}
-          {sessions && sessions.map(session => (
-            <SessionCard key={session.id} session={session} />
-          ))}
+          {/* Session Cards */}
+          {sessions && sessions.length > 0 ? (
+            sessions.map((session, index) => (
+              <div key={session.id || index} className="session-card" onClick={() => navigate(`/sessions/${session.id || index + 1}`)}>
+                <div className="card-header">
+                  <h4 className="card-title">{session.title || 'Indoor Arena'}</h4>
+                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}>
+                    <FaEllipsisH />
+                  </button>
+                </div>
+                <p className="card-time">{session.time || '7:30 - 2h49'}</p>
+                <p className="card-videos">{session.videoCount || 5} videos</p>
+                <div className="card-badges">
+                  <span className="badge">Score: {session.score || '###'}</span>
+                  <span className="badge">Band: {session.band || '4-6'}</span>
+                </div>
+              </div>
+            ))
+          ) : (
+            // Placeholder cards
+            <>
+              <div className="session-card" onClick={() => navigate('/sessions/1')}>
+                <div className="card-header">
+                  <h4 className="card-title">Indoor Arena</h4>
+                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}><FaEllipsisH /></button>
+                </div>
+                <p className="card-time">7:30 - 2h49</p>
+                <p className="card-videos">5 videos</p>
+                <div className="card-badges">
+                  <span className="badge">Score: ###</span>
+                  <span className="badge">Band: 4-6</span>
+                </div>
+              </div>
+              <div className="session-card" onClick={() => navigate('/sessions/2')}>
+                <div className="card-header">
+                  <h4 className="card-title">Indoor Arena</h4>
+                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}><FaEllipsisH /></button>
+                </div>
+                <p className="card-time">7:30 - 2h49</p>
+                <p className="card-videos">5 videos</p>
+                <div className="card-badges">
+                  <span className="badge">Score: ###</span>
+                  <span className="badge">Band: 4-6</span>
+                </div>
+              </div>
+              <div className="session-card" onClick={() => navigate('/sessions/3')}>
+                <div className="card-header">
+                  <h4 className="card-title">Indoor Arena</h4>
+                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}><FaEllipsisH /></button>
+                </div>
+                <p className="card-time">7:30 - 2h49</p>
+                <p className="card-videos">5 videos</p>
+                <div className="card-badges">
+                  <span className="badge">Score: ###</span>
+                  <span className="badge">Band: 4-6</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-
-        {/* (Tùy chọn) Dòng nhắc nhở nhỏ bên dưới nếu chưa có bài tập nào */}
-        {(!sessions || sessions.length === 0) && (
-           <p style={{ marginTop: '15px', color: '#888', fontSize: '0.9rem' }}>
-             * Bấm vào thẻ dấu cộng ở trên để bắt đầu buổi tập đầu tiên.
-           </p>
-        )}
       </section>
 
-      {/* --- COURSES (GIỮ NGUYÊN HOẶC SỬA TÙY BẠN) --- */}
-      {/* Phần Courses thường người dùng không tự tạo khóa học nên giữ logic cũ là hợp lý */}
+      {/* Courses Section */}
       <section className="section-block">
-         <h3>Courses</h3>
-         
-         {courses?.length > 0 ? (
-           <div className="card-grid">
-             {courses.map(course => (
-               <CourseCard key={course._id} course={course} />
-             ))}
-           </div>
-         ) : (
-           /* Giao diện khi chưa đăng ký khóa học nào */
-           <div className="empty-state-box">
-             <div className="empty-icon"><FaBookOpen size={30} /></div>
-             <p>Chưa có khóa học nào được đăng ký.</p>
-             <button className="btn-create-now" onClick={() => navigate('/courses')}>
-               Khám phá khóa học
-             </button>
-           </div>
-         )}
+        <h3 className="section-title">Courses</h3>
+        <div className="card-grid">
+          {courses && courses.length > 0 ? (
+            courses.map((course, index) => (
+              <div key={course._id || index} className={`course-card ${course.status}`} onClick={() => navigate(`/courses/${course._id}`)}>
+                <div className="card-header">
+                  <h4 className="card-title">{course.title || 'Backswing Action'}</h4>
+                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}>
+                    <FaEllipsisH />
+                  </button>
+                </div>
+                <p className="card-videos">{course.videoCount || 5} videos</p>
+                <div className="card-badges">
+                  <span className={`badge course-${course.status || 'start'}`}>
+                    {course.status === 'inprogress' ? 'Resume' : course.status === 'completed' ? 'Review' : 'Start Courses'}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            // Placeholder course cards
+            <>
+              <div className="course-card start">
+                <div className="card-header">
+                  <h4 className="card-title">Backswing Action</h4>
+                  <button className="options-btn"><FaEllipsisH /></button>
+                </div>
+                <p className="card-videos">5 videos</p>
+                <div className="card-badges">
+                  <span className="badge course-start">Start Courses</span>
+                </div>
+              </div>
+              <div className="course-card inprogress">
+                <div className="card-header">
+                  <h4 className="card-title">Backswing Action</h4>
+                  <button className="options-btn"><FaEllipsisH /></button>
+                </div>
+                <p className="card-videos">5 videos</p>
+                <div className="card-badges">
+                  <span className="badge course-inprogress">Resume</span>
+                </div>
+              </div>
+              <div className="course-card completed">
+                <div className="card-header">
+                  <h4 className="card-title">Backswing Action</h4>
+                  <button className="options-btn"><FaEllipsisH /></button>
+                </div>
+                <p className="card-videos">5 videos</p>
+                <div className="card-badges">
+                  <span className="badge course-completed">Review</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </section>
     </div>
   );

@@ -1,0 +1,157 @@
+.course-checklist-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 16px;
+  box-shadow: 0px 5px 4px 0px rgba(0, 0, 0, 0.5);
+  align-items: center;
+}
+
+.checklist-header {
+  padding: 30px 20px 20px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: #000;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.back-button:hover {
+  transform: translateX(-5px);
+}
+
+.back-button svg {
+  flex-shrink: 0;
+}
+
+.checklist-content {
+  display: flex;
+  gap: 40px;
+  padding: 10px 30px;
+  align-items: center;
+  flex: 1;
+}
+
+.checklist-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  max-width: 700px;
+}
+
+.checklist-section h1 {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 700;
+  font-size: 50px;
+  color: #075b1f;
+  margin: 0;
+  line-height: normal;
+}
+
+.checklist-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  line-height: normal;
+}
+
+.checklist-items li {
+  position: relative;
+  padding-left: 30px;
+}
+
+.checklist-items li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: #000;
+}
+
+.checklist-items strong {
+  font-weight: 700;
+  color: #000;
+}
+
+.checklist-items li {
+  font-weight: 400;
+  color: #000;
+}
+
+.course-preview {
+  width: 650px;
+  height: 700px;
+  flex-shrink: 0;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 10px 10px 20px 0px rgba(0, 0, 0, 0.25);
+}
+
+.course-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.checklist-footer {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.start-training-btn {
+  background-color: #075b1f;
+  border: none;
+  border-radius: 18px;
+  padding: 15px 60px;
+  min-width: 371px;
+  height: 73px;
+  cursor: pointer;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 700;
+  font-size: 25px;
+  color: white;
+}
+
+.start-training-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 8px 0px rgba(0, 0, 0, 0.3);
+}
+
+.start-training-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 1200px) {
+  .checklist-content {
+    flex-direction: column;
+  }
+
+  .checklist-section {
+    max-width: 100%;
+  }
+
+  .course-preview {
+    width: 100%;
+    max-width: 590px;
+  }
+}

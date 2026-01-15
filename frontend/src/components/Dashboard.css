@@ -1,159 +1,377 @@
-/* src/components/Dashboard.css */
+/* Dashboard Container */
 .dashboard-container {
-  display: flex;
-  height: 100vh;
-  background-color: #f5f5f5; /* Màu nền xám nhẹ tổng thể */
+  padding: 56px 48px 40px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
-/* --- SIDEBAR --- */
-.sidebar {
-  width: 80px; /* Sidebar nhỏ gọn */
-  background-color: #1B5E20; /* Xanh đậm */
+/* Loading Screen */
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 18px;
+  color: #075b1f;
+}
+
+/* Header Section */
+.dashboard-header-section {
+  margin-bottom: 48px;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.greeting {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #075b1f;
+  margin: 0;
+  line-height: normal;
+}
+
+.location-wrapper {
+  padding: 10px 0;
+}
+
+.location-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.location-icon {
+  width: 24px;
+  height: 24px;
+  color: #9cbc12;
+}
+
+.location-text {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #9cbc12;
+  line-height: normal;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-bottom: 48px;
+}
+
+.progress-card {
+  background-color: #075b1f;
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  height: 112px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  color: white;
+  overflow: hidden;
 }
 
-.sidebar a, .logout-btn {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.2rem;
-  margin: 15px 0;
-  cursor: pointer;
-  background: none;
-  border: none;
-  display: block;
-  text-decoration: none;
+.progress-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: normal;
 }
 
-.sidebar a:hover, .sidebar a.active {
-  color: white;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  margin-top: 40px;
-  gap: 20px;
-}
-
-/* --- MAIN CONTENT --- */
-.main-content {
-  flex: 1;
-  padding: 40px;
-  overflow-y: auto; /* Cho phép cuộn nội dung */
-  background-color: #fff; /* Nền trắng như thiết kế */
-}
-
-.dashboard-header h1 {
-  color: #1B5E20;
-  margin-bottom: 5px;
-}
-
-.dashboard-header p {
-  color: #888;
-  font-size: 0.9rem;
-  margin-bottom: 30px;
-}
-
-/* --- Progress Bar --- */
-.progress-card {
-  background-color: #1B5E20;
-  padding: 20px;
-  border-radius: 10px;
-  color: white;
-  margin-bottom: 40px;
+.progress-bar-wrapper {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 0;
 }
 
 .progress-bar-container {
   display: flex;
-  height: 10px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 5px;
-  margin-top: 15px;
   gap: 5px;
+  height: 8px;
   position: relative;
 }
 
-.progress-segment { flex: 1; height: 100%; border-radius: 5px; }
-.red { background-color: #e53935; }
-.orange { background-color: #fb8c00; }
-.yellow { background-color: #fdd835; position: relative; }
-.green { background-color: #43a047; }
-.blue { background-color: #1e88e5; }
-.purple { background-color: #8e24aa; }
+.progress-segment {
+  flex: 1;
+  height: 100%;
+  border-radius: 0;
+}
+
+.progress-segment.red {
+  background-color: #dc2626;
+}
+
+.progress-segment.orange {
+  background-color: #f97316;
+}
+
+.progress-segment.yellow {
+  background-color: #fbbf24;
+  position: relative;
+}
+
+.progress-segment.green {
+  background-color: #84cc16;
+}
+
+.progress-segment.blue {
+  background-color: #0369a1;
+}
+
+.progress-segment.purple {
+  background-color: #6b21a8;
+}
+
+.flag-marker {
+  position: absolute;
+  top: -18px;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .flag-icon {
-  position: absolute;
-  top: -20px;
-  right: 0;
-  color: white;
-  font-size: 12px;
+  color: #ffffff;
+  font-size: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* --- Grid & Cards --- */
-.section-block { margin-bottom: 40px; }
-.section-block h3 { color: #1B5E20; margin-bottom: 20px; }
+/* Section Block */
+.section-block {
+  margin-bottom: 48px;
+}
 
+.section-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #075b1f;
+  margin: 0 0 20px 0;
+  line-height: normal;
+}
+
+/* Card Grid */
 .card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 10px 0;
+  align-content: flex-start;
 }
 
-.card {
+/* Session Cards */
+.session-card {
+  width: 288px;
+  background: #9cbc12;
+  border-radius: 8px;
   padding: 20px;
-  border-radius: 12px;
-  position: relative;
-  min-height: 140px;
+  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 2px;
 }
 
-/* Add Card */
-.add-card {
-  background-color: #C5E1A5; /* Xanh nhạt */
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
+}
+
+.session-card.add-card {
+  background: #b4c860;
+  height: 160px;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+}
+
+.add-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.add-icon {
+  font-size: 56px;
+  color: #000000;
+  opacity: 0.8;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.card-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  line-height: normal;
+  flex: 1;
+}
+
+.options-btn {
+  background: none;
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px dashed #AED581;
-}
-.plus-icon { font-size: 2rem; color: #33691E; }
-
-/* Session Card */
-.session-card {
-  background-color: #C5E1A5;
-}
-.card-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
-.time, .video-count { font-size: 0.8rem; color: #33691E; margin-bottom: 5px; }
-
-.card-stats { display: flex; gap: 10px; margin-top: 10px; }
-.badge {
-  background-color: #33691E;
-  color: white;
-  font-size: 0.7rem;
-  padding: 4px 8px;
-  border-radius: 4px;
+  color: #000000;
+  padding: 0;
+  flex-shrink: 0;
 }
 
-/* Course Card */
-.course-card {
-  background-color: #1B5E20;
-  color: white;
+.options-btn:hover {
+  opacity: 0.7;
 }
-.course-card .video-count { color: rgba(255,255,255,0.7); }
 
-.course-btn {
-  background-color: #C5E1A5;
-  color: #1B5E20;
-  border: none;
-  padding: 8px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
+.card-time,
+.card-videos {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  line-height: normal;
+}
+
+.card-badges {
+  display: flex;
+  gap: 14px;
   margin-top: 10px;
+  padding: 5px 0;
 }
-.btn-resume { background-color: #81C784; }
+
+.badge {
+  background: #075b1f;
+  border-radius: 5px;
+  padding: 5px 20px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: normal;
+  white-space: nowrap;
+  border: none;
+}
+
+/* Course Cards */
+.course-card {
+  width: 288px;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
+}
+
+.course-card.start {
+  background: #075b1f;
+}
+
+.course-card.inprogress {
+  background: #075b1f;
+}
+
+.course-card.completed {
+  background: #075b1f;
+}
+
+.course-card .card-title {
+  color: #ffffff;
+}
+
+.course-card .options-btn {
+  color: #ffffff;
+}
+
+.course-card .card-videos {
+  color: #ffffff;
+}
+
+.badge.course-start {
+  background: #a3e635;
+  color: #ffffff;
+}
+
+.badge.course-inprogress {
+  background: #65a30d;
+  color: #ffffff;
+}
+
+.badge.course-completed {
+  background: #15803d;
+  color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    padding: 40px 30px;
+  }
+
+  .greeting {
+    font-size: 32px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 30px 20px;
+  }
+
+  .greeting {
+    font-size: 28px;
+  }
+
+  .location-text {
+    font-size: 16px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .card-grid {
+    justify-content: center;
+  }
+
+  .session-card,
+  .course-card {
+    width: 100%;
+    max-width: 400px;
+  }
+}

@@ -9,9 +9,13 @@ import DashboardLayout from './layouts/DashboardLayout';
 import LandingPage from './pages/LandingPage';
 import Auth from './pages/Auth'; // Trang Login/Register chung
 import Dashboard from './components/Dashboard';
-
-// Giả sử có thêm trang Courses
-const CoursesPage = () => <div>Trang khóa học</div>;
+import SessionsList from './pages/SessionsList';
+import SessionDetail from './pages/SessionDetail';
+import VideoAnalysis from './pages/VideoAnalysis';
+import Courses from './pages/Courses';
+import CourseChecklist from './pages/CourseChecklist';
+import CourseTraining from './pages/CourseTraining';
+import CourseComplete from './pages/CourseComplete';
 
 function App() {
   return (
@@ -32,9 +36,16 @@ function App() {
         {/* --- NHÓM 3: PRIVATE (Có Sidebar, không Header cũ) --- */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/sessions" element={<div>Trang Session</div>} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:courseId/checklist" element={<CourseChecklist />} />
+          <Route path="/sessions" element={<SessionsList />} />
+          <Route path="/sessions/:id" element={<SessionDetail />} />
         </Route>
+        
+        {/* Full Screen Routes (No Sidebar) */}
+        <Route path="/sessions/:sessionId/video/:videoId" element={<VideoAnalysis />} />
+        <Route path="/courses/:courseId/training/:stepId" element={<CourseTraining />} />
+        <Route path="/courses/:courseId/complete" element={<CourseComplete />} />
 
       </Routes>
     </Router>

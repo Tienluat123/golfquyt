@@ -1,14 +1,20 @@
 .dashboard-layout {
   display: flex;
-  background-color: #FAFAFA; /* Nền xám nhẹ */
+  background-color: #FFFFFF;
   min-height: 100vh;
 }
 
 .dashboard-content {
-  margin-left: 90px; /* Đẩy nội dung sang phải bằng đúng độ rộng Sidebar */
   flex: 1;
-  padding: 40px 60px; /* Tạo khoảng thở xung quanh */
-  
-  /* QUAN TRỌNG: Giới hạn chiều rộng để không bị bè ra trên màn hình to */
-  max-width: 1400px; 
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.dashboard-content.sidebar-open {
+  margin-left: 250px;
+}
+
+.dashboard-content.sidebar-closed {
+  margin-left: 80px;
 }

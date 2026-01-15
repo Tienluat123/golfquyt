@@ -1,0 +1,20 @@
+<svg width="93" height="82" viewBox="0 0 93 82" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="23" cy="23" r="23" fill="#F6F6F6"/>
+<path d="M23 59L14.3397 44L31.6603 44L23 59Z" fill="#454545"/>
+<rect x="21" y="55" width="4" height="15" fill="#454545"/>
+<g opacity="0.5">
+<ellipse cx="66.1044" cy="50.1409" rx="12.807" ry="23" transform="rotate(65.6863 66.1044 50.1409)" fill="#2F3416"/>
+<path d="M33.2974 64.9632L44.9815 54.3927L48.9524 63.1817L33.2974 64.9632Z" fill="#2F3416"/>
+<rect x="36.4841" y="62.3014" width="2.2273" height="15" transform="rotate(65.6863 36.4841 62.3014)" fill="#2F3416"/>
+</g>
+<mask id="mask0_13_474" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="46" height="46">
+<circle cx="23" cy="23" r="23" fill="#F6F6F6"/>
+</mask>
+<g mask="url(#mask0_13_474)">
+<circle cx="37.5" cy="9.5" r="8.5" fill="#D9D9D9"/>
+<circle cx="5.5" cy="10.5" r="8.5" fill="#D9D9D9"/>
+<circle cx="17.5" cy="28.5" r="8.5" fill="#D9D9D9"/>
+<circle cx="41.5" cy="38.5" r="8.5" fill="#D9D9D9"/>
+<circle cx="5.5" cy="45.5" r="8.5" fill="#D9D9D9"/>
+</g>
+</svg>
