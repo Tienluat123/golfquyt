@@ -11,21 +11,18 @@ export const analyzeVideo = async (file) => {
     throw new Error('Analysis failed');
   }
 
-  const band = response.headers.get('X-Golf-Band');
-  const probs = response.headers.get('X-Golf-Probs');
-  const swingSpeed = response.headers.get('X-Swing-Speed');
-  const armAngle = response.headers.get('X-Arm-Angle');
-
-  const blob = await response.blob();
-  const videoUrl = URL.createObjectURL(blob);
+  const responseData = await response.json();
+  const { metrics, ai_advice, video_url } = responseData.data;
 
   return {
     result: {
-      band: band || 'Unknown',
-      probs: probs,
-      swingSpeed: parseFloat(swingSpeed || 0).toFixed(2),
-      armAngle: parseFloat(armAngle || 0).toFixed(1)
+      band: metrics.band || 'Unknown',
+      // probs: metrics.probs, // Nếu python có trả về
+      swingSpeed: parseFloat(metrics.swing_speed || 0).toFixed(2),
+      armAngle: parseFloat(metrics.arm_angle || 0).toFixed(1),
+      aiAdvice: ai_advice // Thêm cái này để hiển thị lời khuyên
     },
-    videoUrl
+    // Ghép host vào đường dẫn tương đối để thành link video hoàn chỉnh
+    videoUrl: `http://127.0.0.1:5001${video_url}`
   };
 };

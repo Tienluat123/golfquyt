@@ -1,0 +1,38 @@
+### Upload video (REST Client - minimal)
+POST http://localhost:5001/analyze
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="sample_video.mp4"
+Content-Type: video/mp4
+
+< ./sample_video.mov
+------WebKitFormBoundary--
+
+# Quick setup:
+# 1) Copy the video you want to test to `backend/tests/sample_video.mp4` (or change the filename above).
+#    - In Finder: Option+Right-Click → "Copy as Pathname" or drag the file into Terminal to get the path.
+# 2) Start the backend: `cd backend && npm run dev`.
+# 3) Open this file in VSCode and press "Send Request" on the REST Client request above.
+#
+# Curl (from project root) - replace path if you put the file elsewhere:
+# curl -v -X POST http://localhost:5001/analyze -F "file=@backend/tests/sample_video.mp4"
+
+
+### Upload video (curl) - run in terminal
+# Replace /absolute/path/to/video.mp4 with your file path
+# Example:
+# curl -v -X POST http://localhost:5001/analyze -F "file=@/Users/you/Videos/sample_video.mp4"
+
+# Curl command:
+# curl -v -X POST http://localhost:5001/analyze \
+#   -F "file=@/absolute/path/to/video.mp4"
+
+
+### Test missing file (expects 400)
+POST http://localhost:5001/analyze
+Content-Type: application/json
+
+{
+  "note": "no file sent - expect 400"
+}

@@ -1,0 +1,80 @@
+/* src/components/common/ErrorDisplay.css */
+
+.error-container {
+  background: rgba(42, 31, 31, 0.95);
+  border: 1px solid #ff4d4d;
+  border-left: 5px solid #ff4d4d; /* Điểm nhấn bên trái */
+  border-radius: 8px;
+  padding: 25px;
+  max-width: 450px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(255, 77, 77, 0.15);
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  backdrop-filter: blur(5px);
+}
+
+.error-global {
+  /* Dùng khi muốn hiện lỗi full màn hình hoặc to hơn */
+  max-width: 600px;
+  padding: 40px;
+}
+
+.error-icon svg {
+  width: 50px;
+  height: 50px;
+  color: #ff4d4d;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 77, 0.5));
+}
+
+.error-title {
+  color: #ff8080;
+  margin: 0 0 10px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.error-message {
+  color: #e0e0e0;
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.btn-retry {
+  background: linear-gradient(45deg, #ff4d4d, #cc0000);
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 77, 77, 0.5);
+}
+
+.btn-retry:active {
+  transform: translateY(1px);
+}
+
+/* Hiệu ứng rung lắc gây chú ý */
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}

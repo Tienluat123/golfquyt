@@ -1,21 +1,58 @@
 /* Đây là file style.css */
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 :root {
-  /* Định nghĩa các biến màu - Giống như pha sẵn sơn vào từng thùng */
-  --mau-nen: #fffffe;        /* Background */
-  --mau-chu-chinh: #2b2c34;  /* Headline */
-  --mau-chu-phu: #2b2c34;    /* Paragraph */
-  --mau-nut-bam: #6246ea;    /* Button */
-  --mau-chu-nut: #fffffe;    /* Button Text */
+  --primary-color: #2E7D32; /* Màu xanh lá đậm */
+  --secondary-color: #126F06; /* Màu xanh lá sáng cho nút */
+  --text-color: #333;
+  --light-text: #fff;
+  --background-light: #F8F9FA;
+  --section-spacing: 60px;
 }
 
-/* Cách sử dụng */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  background-color: var(--mau-nen);
-  color: var(--mau-chu-chinh);
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
 }
 
-button {
-  background-color: var(--mau-nut-bam);
-  color: var(--mau-chu-nut);
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 30px;
+  background-color: var(--secondary-color);
+  color: var(--light-text);
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #388E3C;
 }

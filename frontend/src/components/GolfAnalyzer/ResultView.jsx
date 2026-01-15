@@ -26,7 +26,6 @@ export default function ResultView({ videoSrc, analysisResult, onReset }) {
           {/* Tốc độ */}
           <div className="stat-item">
             <div className="stat-header">
-              <span className="stat-icon">🚀</span>
               <span>Tốc độ Swing</span>
             </div>
             <div className="stat-number">{analysisResult?.swingSpeed || '--'} <small>units</small></div>
@@ -39,7 +38,6 @@ export default function ResultView({ videoSrc, analysisResult, onReset }) {
           {/* Góc tay */}
           <div className="stat-item">
             <div className="stat-header">
-              <span className="stat-icon">📐</span>
               <span>Góc tay</span>
             </div>
             <div className="stat-number">{analysisResult?.armAngle || '--'}<small>°</small></div>
@@ -51,7 +49,7 @@ export default function ResultView({ videoSrc, analysisResult, onReset }) {
         </div>
 
         <button onClick={onReset} className="btn-retry">
-          🔄 Phân tích video khác
+        Phân tích video khác
         </button>
       </div>
     </div>

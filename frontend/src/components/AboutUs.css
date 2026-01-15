@@ -1,0 +1,26 @@
+/* --- About Us Section --- */
+.about-us {
+  padding: var(--section-spacing) 0;
+}
+
+.about-content {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.about-image-placeholder {
+  flex: 1;
+  height: 400px;
+  background-color: #E0E0E0; /* Màu xám placeholder */
+  border-radius: 10px;
+}
+
+.about-text {
+  flex: 1;
+}
+
+.about-text h3 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}

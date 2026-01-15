@@ -10,6 +10,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  z-index: 10; /* Đảm bảo nằm trên background */
+  transition: max-width 0.3s ease; /* Hiệu ứng mở rộng mượt mà */
+}
+
+/* Khi có kết quả, mở rộng container */
+.analyzer-container:has(.result-card) {
+  max-width: 1000px;
 }
 
 /* Upload Style */
@@ -116,9 +124,11 @@
   gap: 30px;
   width: 100%;
   align-items: flex-start;
+  flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
 }
 .video-section { 
   flex: 1.2; 
+  min-width: 300px; /* Đảm bảo video không bị quá nhỏ */
   border-radius: 12px; 
   overflow: hidden; 
   position: relative; 
@@ -150,7 +160,11 @@
   border: 1px solid #00e676;
 }
 
-.score-section { flex: 1; text-align: left; }
+.score-section { 
+  flex: 1; 
+  text-align: left; 
+  min-width: 280px; /* Đảm bảo phần điểm số không bị ép quá nhỏ */
+}
 
 .rank-card {
   background: var(--brand-color); /* Màu tím chủ đạo */

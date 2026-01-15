@@ -1,0 +1,159 @@
+/* src/components/Dashboard.css */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f5f5; /* Màu nền xám nhẹ tổng thể */
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+  width: 80px; /* Sidebar nhỏ gọn */
+  background-color: #1B5E20; /* Xanh đậm */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  color: white;
+}
+
+.sidebar a, .logout-btn {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.2rem;
+  margin: 15px 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: block;
+  text-decoration: none;
+}
+
+.sidebar a:hover, .sidebar a.active {
+  color: white;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+  gap: 20px;
+}
+
+/* --- MAIN CONTENT --- */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto; /* Cho phép cuộn nội dung */
+  background-color: #fff; /* Nền trắng như thiết kế */
+}
+
+.dashboard-header h1 {
+  color: #1B5E20;
+  margin-bottom: 5px;
+}
+
+.dashboard-header p {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 30px;
+}
+
+/* --- Progress Bar --- */
+.progress-card {
+  background-color: #1B5E20;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.progress-bar-container {
+  display: flex;
+  height: 10px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 5px;
+  margin-top: 15px;
+  gap: 5px;
+  position: relative;
+}
+
+.progress-segment { flex: 1; height: 100%; border-radius: 5px; }
+.red { background-color: #e53935; }
+.orange { background-color: #fb8c00; }
+.yellow { background-color: #fdd835; position: relative; }
+.green { background-color: #43a047; }
+.blue { background-color: #1e88e5; }
+.purple { background-color: #8e24aa; }
+
+.flag-icon {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  color: white;
+  font-size: 12px;
+}
+
+/* --- Grid & Cards --- */
+.section-block { margin-bottom: 40px; }
+.section-block h3 { color: #1B5E20; margin-bottom: 20px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 20px;
+  border-radius: 12px;
+  position: relative;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Add Card */
+.add-card {
+  background-color: #C5E1A5; /* Xanh nhạt */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px dashed #AED581;
+}
+.plus-icon { font-size: 2rem; color: #33691E; }
+
+/* Session Card */
+.session-card {
+  background-color: #C5E1A5;
+}
+.card-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
+.time, .video-count { font-size: 0.8rem; color: #33691E; margin-bottom: 5px; }
+
+.card-stats { display: flex; gap: 10px; margin-top: 10px; }
+.badge {
+  background-color: #33691E;
+  color: white;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Course Card */
+.course-card {
+  background-color: #1B5E20;
+  color: white;
+}
+.course-card .video-count { color: rgba(255,255,255,0.7); }
+
+.course-btn {
+  background-color: #C5E1A5;
+  color: #1B5E20;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.btn-resume { background-color: #81C784; }

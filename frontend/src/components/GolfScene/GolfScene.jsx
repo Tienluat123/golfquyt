@@ -23,6 +23,9 @@ export default function GolfScene() {
       {/* Mây trang trí */}
       <div className="cloud cloud-1"></div>
       <div className="cloud cloud-2"></div>
+
+      {/* Mặt trời Happy Hues */}
+      <div className="sun"></div>
     </div>
   );
 }

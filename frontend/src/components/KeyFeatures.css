@@ -1,0 +1,43 @@
+.key-features {
+  padding: var(--section-spacing) 0;
+  background-color: var(--background-light);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.feature-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 400px;
+}
+
+/* Placeholder images cho các feature card */
+.feature-card:nth-child(1) { background: url('ft.png') center/cover; }
+.feature-card:nth-child(2) { background: url('ft.png') center/cover; }
+.feature-card:nth-child(3) { background: url('ft.png') center/cover; }
+.feature-card:nth-child(4) { background: url('ft.png') center/cover; }
+
+.feature-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  color: var(--light-text);
+}
+
+.feature-content h3 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.feature-content p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}

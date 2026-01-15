@@ -1,0 +1,188 @@
+/* src/components/Auth.css */
+
+/* --- Cấu trúc trang --- */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f6f5f7;
+}
+
+.auth-page .header-wrapper .header {
+  position: relative;
+  background-color: #1B5E20;
+}
+
+.auth-container-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+}
+
+/* --- Container chính của hiệu ứng --- */
+.auth-box {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 
+              0 10px 10px rgba(0,0,0,0.22);
+  position: relative;
+  overflow: hidden;
+  width: 900px; /* Độ rộng fix cứng hoặc max-width */
+  max-width: 100%;
+  min-height: 600px; /* Chiều cao cố định để trượt */
+}
+
+.form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.6s enable-in-out;
+}
+
+.form-container form {
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 50px;
+  height: 100%;
+  text-align: center;
+}
+
+/* Input Styles */
+.form-container input {
+  background-color: #eee;
+  border: none;
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
+  border-radius: 5px;
+}
+
+/* Button Styles */
+.btn-auth {
+  border-radius: 20px;
+  border: 1px solid #1B5E20;
+  background-color: #1B5E20;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 80ms ease-in;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.btn-auth:active { transform: scale(0.95); }
+.btn-auth:focus { outline: none; }
+.btn-auth.ghost { background-color: transparent; border-color: #FFFFFF; }
+
+/* --- LOGIC TRƯỢT (QUAN TRỌNG) --- */
+
+/* 1. Vị trí ban đầu của Sign In (Hiện ra trước) */
+.sign-in-container {
+  left: 0;
+  width: 50%;
+  z-index: 2;
+}
+
+/* 2. Vị trí ban đầu của Sign Up (Ẩn bên dưới) */
+.sign-up-container {
+  left: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+}
+
+/* 3. Khi Active Sign Up (Bấm nút chuyển) */
+.auth-box.right-panel-active .sign-in-container {
+  transform: translateX(100%); /* Đẩy Sign In sang phải */
+}
+
+.auth-box.right-panel-active .sign-up-container {
+  transform: translateX(100%); /* Đẩy Sign Up sang phải theo */
+  opacity: 1;
+  z-index: 5;
+  animation: show 0.6s; /* Hiện dần lên */
+}
+
+@keyframes show {
+  0%, 49.99% { opacity: 0; z-index: 1; }
+  50%, 100% { opacity: 1; z-index: 5; }
+}
+
+/* --- PHẦN OVERLAY (Tấm ảnh màu xanh) --- */
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s ease-in-out;
+  z-index: 100;
+}
+
+.auth-box.right-panel-active .overlay-container {
+  transform: translateX(-100%); /* Đẩy tấm ảnh sang trái */
+}
+
+.overlay {
+  /* Gradient màu xanh Golf */
+  background: #1B5E20;
+  background: -webkit-linear-gradient(to right, #2E7D32, #1B5E20);
+  background: linear-gradient(to right, #2E7D32, #1B5E20);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 0 0;
+  color: #FFFFFF;
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%; /* Rộng gấp đôi để chứa 2 text trái phải */
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.auth-box.right-panel-active .overlay {
+  transform: translateX(50%);
+}
+
+.overlay-panel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.overlay-left { transform: translateX(-20%); }
+.auth-box.right-panel-active .overlay-left { transform: translateX(0); }
+
+.overlay-right { right: 0; transform: translateX(0); }
+.auth-box.right-panel-active .overlay-right { transform: translateX(20%); }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    /* Trên mobile thì khó trượt, nên cho hiện dọc */
+    .auth-box { width: 100%; min-height: auto; flex-direction: column; }
+    .overlay-container { display: none; } /* Ẩn hiệu ứng trượt trên mobile */
+    .sign-in-container, .sign-up-container { width: 100%; position: relative; height: auto; padding: 20px 0; }
+    .sign-up-container { opacity: 1; z-index: 2; display: none;}
+    
+    /* Logic hiện/ẩn đơn giản cho mobile */
+    .auth-box.right-panel-active .sign-in-container { display: none; }
+    .auth-box.right-panel-active .sign-up-container { display: flex; transform: none; }
+}

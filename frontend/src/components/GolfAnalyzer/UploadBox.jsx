@@ -12,7 +12,6 @@ export default function UploadBox({ onFileSelect }) {
 
   return (
     <div className="upload-box" onClick={() => fileInputRef.current.click()}>
-      <div className="icon-upload">📂</div>
       <h3>Thả video cú đánh của bạn vào đây</h3>
       <p>(Hỗ trợ MP4, MOV - Tối đa 50MB)</p>
       <button className="btn-upload">TẢI VIDEO LÊN</button>

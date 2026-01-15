@@ -1,5 +1,6 @@
 import { useGolfAnalysis } from '../../hooks/useGolfAnalysis';
 import UploadBox from './UploadBox';
+import ErrorDisplay from '../ErrorDisplay';
 import ProcessingView from './ProcessingView';
 import ResultView from './ResultView';
 import './GolfAnalyzer.css';
@@ -11,6 +12,7 @@ export default function GolfAnalyzer() {
     loadingText,
     progress,
     analysisResult,
+    error,
     processVideo,
     resetAnalysis
   } = useGolfAnalysis();
@@ -30,6 +32,14 @@ export default function GolfAnalyzer() {
           videoSrc={videoSrc} 
           analysisResult={analysisResult} 
           onReset={resetAnalysis} 
+        />
+      )}
+
+      {status === 'error' && (
+        <ErrorDisplay 
+          title="Úi, có sự cố!" 
+          message={error} 
+          onRetry={resetAnalysis} 
         />
       )}
     </div>
