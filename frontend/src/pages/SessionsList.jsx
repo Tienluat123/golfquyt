@@ -64,9 +64,9 @@ const SessionsList = () => {
         {/* Existing Sessions */}
         {displaySessions.map((session) => (
           <div 
-            key={session.id} 
+            key={session._id} 
             className="session-card-item"
-            onClick={() => handleSessionClick(session.id)}
+            onClick={() => handleSessionClick(session._id)}
           >
             {/* Session Image */}
             <div className="session-card-image">

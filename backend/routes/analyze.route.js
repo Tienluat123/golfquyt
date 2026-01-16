@@ -4,6 +4,8 @@ const upload = require('../middleware/upload.middleware');
 const analyzeController = require('../controllers/analysis.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 
-router.post('/analyze', upload.single('file'), analyzeController.analyzeVideo);
+router.post('/', upload.single('file'), authMiddleware, analyzeController.analyzeVideo);
+router.get('/:id', authMiddleware, analyzeController.getAnalysisDetail);
+
 
 module.exports = router;

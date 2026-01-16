@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaMapMarkerAlt, FaEllipsisH, FaFlag } from 'react-icons/fa';
+import { FaPlus, FaMapMarkerAlt, FaFlag } from 'react-icons/fa';
 import { getUserProfile } from '../services/user.service';
-import { getRecentSessions } from '../services/session.service';
+import { getRecentSessions, createNewSession } from '../services/session.service';
 import { getFeaturedCourses } from '../services/course.service';
+
+// Import các Component con đã tách
+import SessionCard from './Dashboard/SessionCard';
+import CourseCard from './Dashboard/CourseCard';
+import ProgressCard from './Dashboard/ProgressCard';
+import CreateSessionModal from './CreateSessionModal';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State cho Modal
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,9 +26,12 @@ const Dashboard = () => {
           getRecentSessions(3),
           getFeaturedCourses(3)
         ]);
+
+        console.log("Fetched user:", userData);
         setUser(userData);
-        setSessions(sessionData || []); 
-        setCourses(courseData || []);
+        console.log("Fetched sessions:", sessionData);
+        setSessions(sessionData?.data || []); 
+        setCourses(courseData?.data || []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -31,186 +39,91 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [navigate]);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="loading-screen">Loading...</div>
-      </div>
-    );
-  }
+  const handleCreateSession = async (title, location) => {
+      try {
+          const res = await createNewSession(title, location);
+          if (res.success) {
+              setSessions([res.data, ...sessions]); // Thêm vào đầu danh sách
+              setIsModalOpen(false);
+          }
+      } catch (err) { alert(err.message); }
+  };
 
-  const userName = user?.name || 'Alex Nguyen';
-  const userLocation = user?.location || 'Ho Chi Minh city, Vietnam';
+  if (loading) return <div className="loading-screen">Loading...</div>;
 
   return (
     <div className="dashboard-container">
-      {/* Header Section */}
+      {/* 1. Header Section */}
       <div className="dashboard-header-section">
         <div className="header-content">
-          <h1 className="greeting">Hello, {userName}!</h1>
-          <div className="location-wrapper">
-            <div className="location-info">
+          <h1 className="greeting">Hello, {user?.username || 'Golfer'}!</h1>
+          <div className="location-info">
               <FaMapMarkerAlt className="location-icon" />
-              <span className="location-text">{userLocation}</span>
-            </div>
+              <span>{user?.location || 'Vietnam'}</span>
           </div>
         </div>
       </div>
 
-      {/* Progress Card - Master of Golf */}
-      <div className="progress-section">
-        <div className="progress-card">
-          <h2 className="progress-title">Master of Golf</h2>
-          <div className="progress-bar-wrapper">
-            <div className="progress-bar-container">
-              <div className="progress-segment red"></div>
-              <div className="progress-segment orange"></div>
-              <div className="progress-segment yellow">
-                <div className="flag-marker">
-                  <FaFlag className="flag-icon" />
-                </div>
-              </div>
-              <div className="progress-segment green"></div>
-              <div className="progress-segment blue"></div>
-              <div className="progress-segment purple"></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Golf Session Section */}
+    {/* 2. Progress Section */}
+    <section className="section-block">
+    <h3 className="section-title">Your Progress</h3>
+    
+    {/* Không cần map, chỉ render 1 lần và truyền USER vào */}
+    <div className="card-grid" style={{ display: 'block' }}> {/* display block để nó full width */}
+        {user ? (
+            <ProgressCard user={user} />
+        ) : (
+            <p className="loading-text">Đang tải thông tin thành viên...</p>
+        )}
+    </div>
+</section>
+        
+      
+
+      {/* 3. Golf Session Section */}
       <section className="section-block">
         <h3 className="section-title">Golf Session</h3>
         <div className="card-grid">
-          {/* Add New Session Card */}
-          <div className="session-card add-card" onClick={() => navigate('/sessions/create')}>
-            <div className="add-icon-wrapper">
-              <FaPlus className="add-icon" />
-            </div>
+          
+          {/* Nút dấu cộng mở Modal */}
+          <div className="session-card add-card" onClick={() => setIsModalOpen(true)}>
+            <FaPlus className="add-icon" />
           </div>
 
-          {/* Session Cards */}
-          {sessions && sessions.length > 0 ? (
-            sessions.map((session, index) => (
-              <div key={session.id || index} className="session-card" onClick={() => navigate(`/sessions/${session.id || index + 1}`)}>
-                <div className="card-header">
-                  <h4 className="card-title">{session.title || 'Indoor Arena'}</h4>
-                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}>
-                    <FaEllipsisH />
-                  </button>
-                </div>
-                <p className="card-time">{session.time || '7:30 - 2h49'}</p>
-                <p className="card-videos">{session.videoCount || 5} videos</p>
-                <div className="card-badges">
-                  <span className="badge">Score: {session.score || '###'}</span>
-                  <span className="badge">Band: {session.band || '4-6'}</span>
-                </div>
-              </div>
+          {/* Render List Session */}
+          {sessions.length > 0 ? (
+            sessions.map((session) => (
+              <SessionCard key={session._id} session={session} />
             ))
           ) : (
-            // Placeholder cards
-            <>
-              <div className="session-card" onClick={() => navigate('/sessions/1')}>
-                <div className="card-header">
-                  <h4 className="card-title">Indoor Arena</h4>
-                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}><FaEllipsisH /></button>
-                </div>
-                <p className="card-time">7:30 - 2h49</p>
-                <p className="card-videos">5 videos</p>
-                <div className="card-badges">
-                  <span className="badge">Score: ###</span>
-                  <span className="badge">Band: 4-6</span>
-                </div>
-              </div>
-              <div className="session-card" onClick={() => navigate('/sessions/2')}>
-                <div className="card-header">
-                  <h4 className="card-title">Indoor Arena</h4>
-                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}><FaEllipsisH /></button>
-                </div>
-                <p className="card-time">7:30 - 2h49</p>
-                <p className="card-videos">5 videos</p>
-                <div className="card-badges">
-                  <span className="badge">Score: ###</span>
-                  <span className="badge">Band: 4-6</span>
-                </div>
-              </div>
-              <div className="session-card" onClick={() => navigate('/sessions/3')}>
-                <div className="card-header">
-                  <h4 className="card-title">Indoor Arena</h4>
-                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}><FaEllipsisH /></button>
-                </div>
-                <p className="card-time">7:30 - 2h49</p>
-                <p className="card-videos">5 videos</p>
-                <div className="card-badges">
-                  <span className="badge">Score: ###</span>
-                  <span className="badge">Band: 4-6</span>
-                </div>
-              </div>
-            </>
+            <p className="empty-text">Chưa có buổi tập nào. Bấm dấu + để tạo mới!</p>
           )}
         </div>
       </section>
 
-      {/* Courses Section */}
+      {/* 4. Courses Section */}
       <section className="section-block">
         <h3 className="section-title">Courses</h3>
         <div className="card-grid">
-          {courses && courses.length > 0 ? (
-            courses.map((course, index) => (
-              <div key={course._id || index} className={`course-card ${course.status}`} onClick={() => navigate(`/courses/${course._id}`)}>
-                <div className="card-header">
-                  <h4 className="card-title">{course.title || 'Backswing Action'}</h4>
-                  <button className="options-btn" onClick={(e) => { e.stopPropagation(); }}>
-                    <FaEllipsisH />
-                  </button>
-                </div>
-                <p className="card-videos">{course.videoCount || 5} videos</p>
-                <div className="card-badges">
-                  <span className={`badge course-${course.status || 'start'}`}>
-                    {course.status === 'inprogress' ? 'Resume' : course.status === 'completed' ? 'Review' : 'Start Courses'}
-                  </span>
-                </div>
-              </div>
+          {courses.length > 0 ? (
+            courses.map((course) => (
+              <CourseCard key={course._id} course={course} />
             ))
           ) : (
-            // Placeholder course cards
-            <>
-              <div className="course-card start">
-                <div className="card-header">
-                  <h4 className="card-title">Backswing Action</h4>
-                  <button className="options-btn"><FaEllipsisH /></button>
-                </div>
-                <p className="card-videos">5 videos</p>
-                <div className="card-badges">
-                  <span className="badge course-start">Start Courses</span>
-                </div>
-              </div>
-              <div className="course-card inprogress">
-                <div className="card-header">
-                  <h4 className="card-title">Backswing Action</h4>
-                  <button className="options-btn"><FaEllipsisH /></button>
-                </div>
-                <p className="card-videos">5 videos</p>
-                <div className="card-badges">
-                  <span className="badge course-inprogress">Resume</span>
-                </div>
-              </div>
-              <div className="course-card completed">
-                <div className="card-header">
-                  <h4 className="card-title">Backswing Action</h4>
-                  <button className="options-btn"><FaEllipsisH /></button>
-                </div>
-                <p className="card-videos">5 videos</p>
-                <div className="card-badges">
-                  <span className="badge course-completed">Review</span>
-                </div>
-              </div>
-            </>
+            <p className="empty-text">Chưa có khóa học nào.</p>
           )}
         </div>
       </section>
+
+      {/* 5. Modal Component */}
+      <CreateSessionModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreate={handleCreateSession}
+      />
     </div>
   );
 };

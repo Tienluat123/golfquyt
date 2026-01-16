@@ -1,0 +1,12 @@
+### Login
+POST http://localhost:5001/auth/login
+Content-Type: application/json
+
+{
+  "email": "luatpro103qn@gmail.com",
+  "password": "12345678"
+}
+
+### Get profile (paste token from login response)
+GET http://localhost:5001/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Njg5YzUxMWQ2MTQyMjY1ZGMxYjVkNSIsImlhdCI6MTc2ODU0MTMyNywiZXhwIjoxNzY4NjI3NzI3fQ.v4L7aBFcYwIO3GxGGv72K80vwng5009ZgCUQ7KBHJCQ

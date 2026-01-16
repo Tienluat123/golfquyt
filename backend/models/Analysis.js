@@ -1,28 +1,26 @@
 const mongoose = require('mongoose');
 
 const AnalysisSchema = new mongoose.Schema({
-  // Liên kết ngược về Session và User
-  session: { type: mongoose.Schema.Types.ObjectId, ref: 'Session' },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  session: { type: mongoose.Schema.Types.ObjectId, ref: 'Session', required: true }, // Nên có required
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   
-  // Video
-  originalVideoUrl: { type: String },   // Video gốc
-  processedVideoUrl: { type: String },  // Video AI đã vẽ xương
+  originalVideoUrl: { type: String },
+  processedVideoUrl: { type: String },
   
-  // Các chỉ số AI trả về (Lưu dạng Object cho linh hoạt)
+  // Thêm cái này: Ảnh thumbnail của riêng cú đánh này (để hiện trong list)
+  thumbnailUrl: { type: String }, 
+
   metrics: {
     score: { type: Number, default: 0 },
     band: { type: String },
     swingSpeed: { type: Number },
     wristRotation: { type: Number },
     hipRotation: { type: Number },
-    tempo: { type: Number } // Ví dụ thêm: nhịp điệu
+    tempo: { type: Number }
   },
 
-  // Lời khuyên
   aiAdvice: { type: String },
   
-  // Trạng thái xử lý (để Frontend biết mà hiện loading)
   status: { 
     type: String, 
     enum: ['pending', 'processing', 'completed', 'failed'], 

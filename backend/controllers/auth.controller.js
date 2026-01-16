@@ -68,7 +68,9 @@ exports.login = async (req, res) => {
         username: user.username,
         email: user.email,
         avatar: user.avatar,
-        rankTitle: user.rankTitle
+        rankTitle: user.rankTitle,
+        xp: user.experiencePoints,
+        nextLevelXp: 2000
       }
     });
 

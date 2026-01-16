@@ -1,0 +1,100 @@
+/* Thẻ Session cơ bản */
+.session-card {
+  width: 288px;
+  background: #9cbc12;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
+}
+
+/* Thẻ Add (Dấu cộng) */
+.session-card.add-card {
+  background: #b4c860;
+  height: 160px; /* Hoặc auto nếu muốn bằng các thẻ khác */
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+}
+
+.add-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.add-icon {
+  font-size: 56px;
+  color: #000000;
+  opacity: 0.8;
+}
+
+/* Các thành phần con bên trong */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.card-title {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  line-height: normal;
+  flex: 1;
+}
+
+.options-btn {
+  background: none;
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  flex-shrink: 0;
+}
+.options-btn:hover { opacity: 0.7; }
+
+.card-time, .card-videos {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  line-height: normal;
+}
+
+.card-badges {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  padding: 5px 0;
+}
+
+.badge {
+  background: #075b1f;
+  border-radius: 5px;
+  padding: 5px 20px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  border: none;
+  white-space: nowrap;
+}

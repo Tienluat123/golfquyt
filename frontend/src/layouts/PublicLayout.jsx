@@ -9,7 +9,7 @@ const PublicLayout = () => {
   return (
     <>
       <Header />
-      <main className="snap-container">
+      <main className="main-container">
         <Outlet /> 
         <Footer /> {/* Footer nằm trong luồng cuộn của main luôn */}
       </main>

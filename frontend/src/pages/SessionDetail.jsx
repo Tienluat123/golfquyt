@@ -2,135 +2,177 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaRobot, FaPlus, FaPlay } from 'react-icons/fa';
 import axiosClient from '../utils/axiosConfig';
+import UploadModal from '../components/UploadModal'; // <--- Import Modal Upload (Nhớ tạo file này hoặc dùng lại cái cũ)
+import { analyzeVideo } from '../services/analysis.service'; // Service gọi API upload
 import './SessionDetail.css';
 
 const SessionDetail = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams(); // Lấy Session ID từ URL
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // State quản lý Modal Upload
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
+  // Load dữ liệu khi vào trang
   useEffect(() => {
     fetchSessionDetail();
   }, [id]);
 
   const fetchSessionDetail = async () => {
     try {
-      setLoading(false);
+      // Gọi API Backend
       const response = await axiosClient.get(`/sessions/${id}`);
-      setSession(response.data);
+      // Dữ liệu nằm trong response.data (nếu config axiosClient trả về data) 
+      // hoặc response.data.data (nếu trả về full response)
+      const sessionData = response.data || response; 
+      setSession(sessionData);
     } catch (err) {
       console.error('Error fetching session:', err);
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleBack = () => {
-    navigate('/sessions');
+  const handleBack = () => navigate('/dashboard');
+
+  const handleAddVideoClick = () => {
+    setIsUploadModalOpen(true);
   };
 
-  const handleAddVideo = () => {
-    // Navigate to add video page
-    console.log('Add video');
+  const handleUploadVideo = async (file, title) => {
+    try {
+      // 1. Chuẩn bị Form Data
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('sessionId', id); // <--- Gửi kèm ID session để backend biết lưu vào đâu
+
+      // 2. Gọi API Upload
+      await analyzeVideo(formData); 
+      
+      // 3. Tắt Modal & Reload lại dữ liệu để hiện video mới
+      setIsUploadModalOpen(false);
+      fetchSessionDetail(); 
+      alert("Phân tích thành công!");
+
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi upload: " + (error.response?.data?.error || error.message));
+    }
   };
 
-  const handleVideoClick = (videoId) => {
-    // Navigate to video detail/player
-    console.log('Play video:', videoId);
-    navigate(`/sessions/${id}/video/${videoId}`);
+  const handleVideoClick = (video) => {
+    // Chuyển sang trang xem video full màn hình (SessionAnalysis)
+    // Truyền dữ liệu qua state để không phải fetch lại
+    navigate(`/sessions/${id}/video/${video._id}`, { 
+      state: { 
+        data: { data: video }, // Format cho khớp với trang Analysis
+        videoUrl: video.processedVideoUrl 
+      } 
+    });
   };
-
-  // Mock data
-  const mockSession = {
-    id: id,
-    title: 'Indoor Arena',
-    score: '###',
-    band: '4-6',
-    aiComment: 'áddadasdadasdasdas',
-    image: 'https://www.figma.com/api/mcp/asset/ffd91db1-e469-462f-8ef2-9840fab1d84c',
-    videos: [
-      { id: 1, time: '7:30', score: '###', band: '4-6', thumbnail: 'https://www.figma.com/api/mcp/asset/ffd91db1-e469-462f-8ef2-9840fab1d84c' }
-    ]
-  };
-
-  const displaySession = session || mockSession;
 
   if (loading) {
-    return (
-      <div className="session-detail-container">
-        <div className="loading-message">Loading...</div>
-      </div>
-    );
+    return <div className="session-detail-container"><div className="loading-message">Loading...</div></div>;
   }
+
+  // Nếu không tìm thấy session
+  if (!session) return <div className="session-detail-container">Session not found</div>;
+
+  // --- MAPPING DATA (Kết nối dữ liệu thật) ---
+  const displayTitle = session.title || 'Indoor Arena';
+  const displayImage = session.thumbnailUrl || 'https://via.placeholder.com/800x400?text=Golf+Session'; // Ảnh default
+  const displayScore = session.overallScore || 'N/A';
+  const displayBand = session.overallBand || 'N/A';
+  const aiComment = session.aiSummary || "Chưa có nhận xét tổng quan.";
+  
+  // Lấy danh sách video từ trường 'analyses' (do virtual populate)
+  const videoList = session.analyses || [];
 
   return (
     <div className="session-detail-container">
-      {/* Back Button */}
+      {/* Header */}
       <div className="session-detail-header">
         <button className="back-button" onClick={handleBack}>
           <FaArrowLeft />
-          <span>Session</span>
+          <span>Back to Dashboard</span>
         </button>
       </div>
 
       {/* Main Image */}
       <div className="session-detail-image">
-        <img src={displaySession.image} alt={displaySession.title} />
+        {/* Nếu là video url thì dùng thẻ video, nếu ảnh thì dùng img */}
+        {displayImage.endsWith('.mp4') ? (
+            <video src={`http://localhost:5001${displayImage}`} className="cover-media" muted autoPlay loop />
+        ) : (
+            <img src={displayImage} alt={displayTitle} className="cover-media" />
+        )}
       </div>
 
-      {/* Session Title */}
-      <h1 className="session-detail-title">{displaySession.title}</h1>
+      <h1 className="session-detail-title">{displayTitle}</h1>
 
       {/* Stats Cards */}
       <div className="session-stats-grid">
         <div className="session-stat-card">
-          <p className="stat-label">Score</p>
-          <p className="stat-value">{displaySession.score}</p>
+          <p className="stat-label">Overall Score</p>
+          <p className="stat-value">{displayScore}</p>
         </div>
         <div className="session-stat-card">
-          <p className="stat-label">Band</p>
-          <p className="stat-value">{displaySession.band}</p>
+          <p className="stat-label">Est. Band</p>
+          <p className="stat-value">{displayBand}</p>
         </div>
       </div>
 
       {/* AI Comment */}
       <div className="ai-comment-box">
         <FaRobot className="ai-icon" />
-        <p className="ai-comment-text">{displaySession.aiComment}</p>
+        <p className="ai-comment-text">{aiComment}</p>
       </div>
 
-      {/* Videos Section */}
-      <h2 className="videos-section-title">Indoor Arena</h2>
+      {/* Videos List */}
+      <h2 className="videos-section-title">Session Videos ({videoList.length})</h2>
       
       <div className="videos-grid">
-        {/* Add Video Card */}
-        <div className="video-card add-video-card" onClick={handleAddVideo}>
+        {/* Nút Add Video */}
+        <div className="video-card add-video-card" onClick={handleAddVideoClick}>
           <FaPlus className="add-video-icon" />
+          <span>Add Swing</span>
         </div>
 
-        {/* Video Cards */}
-        {displaySession.videos.map((video) => (
+        {/* Render danh sách video thật */}
+        {videoList.map((video, index) => (
           <div 
-            key={video.id} 
+            key={video._id || index} 
             className="video-card"
-            style={{ backgroundImage: `url(${video.thumbnail})` }}
-            onClick={() => handleVideoClick(video.id)}
+            // Nếu có thumbnail riêng thì dùng, ko thì dùng ảnh default
+            style={{ 
+                backgroundImage: `url(${video.thumbnailUrl || 'https://via.placeholder.com/300?text=Swing'})`,
+                backgroundSize: 'cover'
+            }}
+            onClick={() => handleVideoClick(video)}
           >
-            <div className="video-time-overlay">{video.time}</div>
+            <div className="video-time-overlay">
+                {new Date(video.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </div>
             
             <div className="video-thumbnail">
-              <div className="video-play-button">
-                <FaPlay />
-              </div>
+              <div className="video-play-button"><FaPlay /></div>
             </div>
             
             <div className="video-stats">
-              <span className="video-stat-badge">Score: {video.score}</span>
-              <span className="video-stat-badge">Band: {video.band}</span>
+              <span className="video-stat-badge">Band: {video.metrics?.band || 'N/A'}</span>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Modal Upload (Ẩn/Hiện) */}
+      <UploadModal 
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUpload={handleUploadVideo} // Hàm xử lý khi bấm nút Upload trong modal
+      />
     </div>
   );
 };

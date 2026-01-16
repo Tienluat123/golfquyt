@@ -12,31 +12,23 @@
 
 
 
-/* 1. Reset để đảm bảo không có thanh cuộn thừa ở body */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden; /* Ẩn thanh cuộn của trình duyệt đi, ta dùng thanh cuộn của main */
-}
+/* Keep page scrolling default; landing page can opt-in to snap behavior */
+html, body { margin: 0; padding: 0; }
 
-/* 2. Container chính (Thẻ Main) */
-.snap-container {
-  /* Chiều cao bắt buộc phải cố định bằng màn hình */
+/* Main container for public layout pages (allow normal scrolling) */
+.main-container { min-height: 100vh; width: 100%; overflow-y: auto; }
+
+/* Landing page specific snap container - opt-in only */
+.landing-snap-container {
   height: 100vh;
   width: 100vw;
-  
-  /* Tạo thanh cuộn cho riêng nó */
   overflow-y: scroll;
-  
-  /* Kích hoạt chế độ dính */
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }
 
-/* 3. Các Section con */
-.snap-container section {
-  height: 100vh; 
+.landing-snap-container section {
+  height: 100vh;
   width: 100%;
   scroll-snap-align: start;
   scroll-snap-stop: always;

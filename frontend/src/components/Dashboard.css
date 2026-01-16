@@ -1,4 +1,4 @@
-/* Dashboard Container */
+/* Dashboard Layout */
 .dashboard-container {
   padding: 56px 48px 40px;
   background-color: #ffffff;
@@ -6,7 +6,7 @@
   font-family: 'Be Vietnam Pro', sans-serif;
 }
 
-/* Loading Screen */
+/* Loading */
 .loading-screen {
   display: flex;
   align-items: center;
@@ -17,9 +17,7 @@
 }
 
 /* Header Section */
-.dashboard-header-section {
-  margin-bottom: 48px;
-}
+.dashboard-header-section { margin-bottom: 48px; }
 
 .header-content {
   display: flex;
@@ -36,9 +34,7 @@
   line-height: normal;
 }
 
-.location-wrapper {
-  padding: 10px 0;
-}
+.location-wrapper { padding: 10px 0; }
 
 .location-info {
   display: flex;
@@ -60,96 +56,8 @@
   line-height: normal;
 }
 
-/* Progress Section */
-.progress-section {
-  margin-bottom: 48px;
-}
-
-.progress-card {
-  background-color: #075b1f;
-  border-radius: 8px;
-  padding: 20px;
-  position: relative;
-  height: 112px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-}
-
-.progress-title {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-  line-height: normal;
-}
-
-.progress-bar-wrapper {
-  position: absolute;
-  left: 20px;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 0;
-}
-
-.progress-bar-container {
-  display: flex;
-  gap: 5px;
-  height: 8px;
-  position: relative;
-}
-
-.progress-segment {
-  flex: 1;
-  height: 100%;
-  border-radius: 0;
-}
-
-.progress-segment.red {
-  background-color: #dc2626;
-}
-
-.progress-segment.orange {
-  background-color: #f97316;
-}
-
-.progress-segment.yellow {
-  background-color: #fbbf24;
-  position: relative;
-}
-
-.progress-segment.green {
-  background-color: #84cc16;
-}
-
-.progress-segment.blue {
-  background-color: #0369a1;
-}
-
-.progress-segment.purple {
-  background-color: #6b21a8;
-}
-
-.flag-marker {
-  position: absolute;
-  top: -18px;
-  right: 0;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.flag-icon {
-  color: #ffffff;
-  font-size: 24px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-/* Section Block */
+/* Layout chung cho các Section */
+.progress-section,
 .section-block {
   margin-bottom: 48px;
 }
@@ -163,7 +71,7 @@
   line-height: normal;
 }
 
-/* Card Grid */
+/* Grid Layout */
 .card-grid {
   display: flex;
   flex-wrap: wrap;
@@ -172,206 +80,18 @@
   align-content: flex-start;
 }
 
-/* Session Cards */
-.session-card {
-  width: 288px;
-  background: #9cbc12;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.session-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
-}
-
-.session-card.add-card {
-  background: #b4c860;
-  height: 160px;
-  justify-content: center;
-  align-items: center;
-  gap: 0;
-}
-
-.add-icon-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.add-icon {
-  font-size: 56px;
-  color: #000000;
-  opacity: 0.8;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.card-title {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-  line-height: normal;
-  flex: 1;
-}
-
-.options-btn {
-  background: none;
-  border: none;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #000000;
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.options-btn:hover {
-  opacity: 0.7;
-}
-
-.card-time,
-.card-videos {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #000000;
-  margin: 0;
-  line-height: normal;
-}
-
-.card-badges {
-  display: flex;
-  gap: 14px;
-  margin-top: 10px;
-  padding: 5px 0;
-}
-
-.badge {
-  background: #075b1f;
-  border-radius: 5px;
-  padding: 5px 20px;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: normal;
-  white-space: nowrap;
-  border: none;
-}
-
-/* Course Cards */
-.course-card {
-  width: 288px;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
-}
-
-.course-card.start {
-  background: #075b1f;
-}
-
-.course-card.inprogress {
-  background: #075b1f;
-}
-
-.course-card.completed {
-  background: #075b1f;
-}
-
-.course-card .card-title {
-  color: #ffffff;
-}
-
-.course-card .options-btn {
-  color: #ffffff;
-}
-
-.course-card .card-videos {
-  color: #ffffff;
-}
-
-.badge.course-start {
-  background: #a3e635;
-  color: #ffffff;
-}
-
-.badge.course-inprogress {
-  background: #65a30d;
-  color: #ffffff;
-}
-
-.badge.course-completed {
-  background: #15803d;
-  color: #ffffff;
-}
-
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 1200px) {
-  .dashboard-container {
-    padding: 40px 30px;
-  }
-
-  .greeting {
-    font-size: 32px;
-  }
-
-  .section-title {
-    font-size: 22px;
-  }
+  .dashboard-container { padding: 40px 30px; }
+  .greeting { font-size: 32px; }
+  .section-title { font-size: 22px; }
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 30px 20px;
-  }
-
-  .greeting {
-    font-size: 28px;
-  }
-
-  .location-text {
-    font-size: 16px;
-  }
-
-  .section-title {
-    font-size: 20px;
-  }
-
-  .card-grid {
-    justify-content: center;
-  }
-
-  .session-card,
-  .course-card {
-    width: 100%;
-    max-width: 400px;
-  }
+  .dashboard-container { padding: 30px 20px; }
+  .greeting { font-size: 28px; }
+  .location-text { font-size: 16px; }
+  .section-title { font-size: 20px; }
+  .card-grid { justify-content: center; }
+  /* Các card sẽ tự full width nếu component con hỗ trợ */
 }

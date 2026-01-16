@@ -6,7 +6,13 @@ from typing import Dict, Tuple
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_ROOT = BASE_DIR / "Public Test"
-OUTPUT_ROOT = BASE_DIR / "processed_videos"
+# Prefer a repo-level `processed_videos` folder if present (matches existing project layout),
+# otherwise fall back to a service-local `processed_videos` folder.
+repo_level_processed = BASE_DIR.parent / "processed_videos"
+if repo_level_processed.exists():
+    OUTPUT_ROOT = repo_level_processed
+else:
+    OUTPUT_ROOT = BASE_DIR / "processed_videos"
 MODELS_DIR = BASE_DIR.parent / "ai_resources"
 # Some setups keep models in `backend/models` (one level up). Prefer the
 # local `services/models` dir but fall back to the repo-level `models` dir

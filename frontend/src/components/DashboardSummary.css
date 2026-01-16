@@ -1,0 +1,12 @@
+.ds-summary {
+  padding: 12px;
+}
+.ds-summary h4 { margin: 0 0 10px 0; color: #1B5E20 }
+.ds-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px }
+.ds-item { display:flex; align-items:center; gap:10px; background:#fff; border-radius:8px; padding:8px; box-shadow:0 6px 12px rgba(0,0,0,0.04)}
+.ds-thumb { width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#F1F8ED; border-radius:8px; color:#33691E }
+.ds-item-body { flex:1 }
+.ds-title { font-weight:600 }
+.ds-meta { font-size:0.85rem; color:#777 }
+.ds-badge { color:#1B5E20; font-size:1rem }
+.ds-empty { color:#777; padding:12px }

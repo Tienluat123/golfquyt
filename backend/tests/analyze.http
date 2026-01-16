@@ -10,7 +10,7 @@ Content-Type: video/mp4
 ------WebKitFormBoundary--
 
 # Quick setup:
-# 1) Copy the video you want to test to `backend/tests/sample_video.mp4` (or change the filename above).
+# 1) Copy the videohttps://github.com/Tienluat123/golfquyt you want to test to `backend/tests/sample_video.mp4` (or change the filename above).
 #    - In Finder: Option+Right-Click → "Copy as Pathname" or drag the file into Terminal to get the path.
 # 2) Start the backend: `cd backend && npm run dev`.
 # 3) Open this file in VSCode and press "Send Request" on the REST Client request above.

@@ -1,0 +1,79 @@
+/* Container chính */
+.progress-card {
+  background-color: #1B5E20; /* Xanh đậm chủ đạo */
+  border-radius: 16px;
+  padding: 30px;
+  position: relative;
+  /* Xóa height cố định để nó tự giãn theo nội dung */
+  min-height: 140px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  overflow: visible; /* QUAN TRỌNG: Để cái cờ không bị cắt mất ngọn */
+}
+
+/* Tiêu đề Rank (Beginner) */
+.progress-card h3 {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ffffff; /* Chữ màu trắng */
+  margin: 0 0 40px 0; /* Cách xa thanh bar ra một chút */
+  text-transform: capitalize;
+}
+
+/* Khung bao thanh Bar */
+.progress-bar-container {
+  display: flex;
+  height: 14px; /* Độ dày thanh bar */
+  width: 100%;
+  background-color: rgba(255,255,255,0.1); /* Nền mờ phía sau */
+  border-radius: 10px;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* Các đoạn màu nền (Segments) */
+.progress-segment {
+  flex: 1;
+  height: 100%;
+}
+.progress-segment:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+.progress-segment:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+
+/* Màu sắc */
+.progress-segment.red { background-color: #E53935; }
+.progress-segment.orange { background-color: #FB8C00; }
+.progress-segment.yellow { background-color: #FDD835; }
+.progress-segment.green { background-color: #43A047; }
+.progress-segment.blue { background-color: #1E88E5; }
+
+/* --- CÁI CỜ (FLAG) --- */
+.progress-flag {
+  position: absolute;
+  top: -32px; /* Đẩy lên trên thanh bar */
+  transform: translateX(-2px);
+  z-index: 10;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+}
+
+/* --- THANH FILL (Lớp mờ đè lên) --- */
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.3); /* Màu trắng mờ */
+  border-radius: 10px;
+  transition: width 0.5s ease-out;
+}
+
+/* Text XP góc dưới */
+.xp-text {
+  text-align: right;
+  color: #E8F5E9; /* Trắng ngà */
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 5px;
+}

@@ -17,8 +17,12 @@ const PORT = 5001;
 app.use(cors());
 app.use(express.json());
 
+// Serve processed files (processed videos, thumbnails, etc.)
+const path = require('path');
+app.use('/processed', express.static(path.join(__dirname, 'processed')));
+
 // Use routes
-app.use('/', analyzeRoutes);
+app.use('/analyze', analyzeRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);      
 app.use('/sessions', sessionRoutes); 

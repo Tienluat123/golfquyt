@@ -47,3 +47,33 @@ exports.getGolfAdvice = async (metrics) => {
         return "Hệ thống AI đang bảo trì, nhưng cú đánh của bạn có thông số khá tốt!";
     }
 };
+
+
+exports.generateSessionSummary = async (analyses) => {
+    try {
+        // 1. Tóm tắt dữ liệu lịch sử để gửi cho AI (cho nhẹ token)
+        const history = analyses.map((a, i) => 
+            `Cú ${i+1}: Band ${a.metrics.band}, Lỗi: ${a.aiAdvice}`
+        ).join("\n");
+
+        const prompt = `
+            Bạn là HLV Golf. Dựa vào lịch sử các cú đánh sau của học viên trong 1 buổi tập:
+            ${history}
+
+            Hãy đưa ra 1 nhận xét tổng quan ngắn gọn (tối đa 2 câu tiếng Việt) về phong độ và sự tiến bộ của họ. 
+            Ví dụ: "Bạn khởi đầu tốt nhưng về sau bị đuối sức. Cần chú ý giữ tay thẳng."
+        `;
+
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.6,
+            max_tokens: 200,
+        });
+
+        return chatCompletion.choices[0]?.message?.content || "Tiếp tục luyện tập nhé!";
+    } catch (error) {
+        console.error("AI Summary Error:", error);
+        return "Hệ thống đang bận, nhưng hãy cố gắng duy trì phong độ!";
+    }
+};

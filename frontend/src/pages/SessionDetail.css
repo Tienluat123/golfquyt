@@ -314,3 +314,40 @@
     justify-content: center;
   }
 }
+
+
+.cover-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+.add-video-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0fdf4;
+    border: 2px dashed #1B5E20;
+    cursor: pointer;
+    gap: 10px;
+    color: #1B5E20;
+    font-weight: 600;
+}
+
+.add-video-card:hover {
+    background-color: #dcfce7;
+}
+
+.video-card {
+    /* Đảm bảo thẻ có height */
+    min-height: 160px; 
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+.video-card:hover { transform: scale(1.02); }
