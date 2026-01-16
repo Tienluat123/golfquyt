@@ -2,20 +2,37 @@ const Session = require('../models/Session');
 // Ensure Analysis model is registered with mongoose before populate
 require('../models/Analysis');
 
-// API: Tạo Session mới (Chưa có video)
 exports.createSession = async (req, res) => {
   try {
     const { title, location } = req.body;
 
+    console.log("Body nhận được:", req.body);
+    console.log("File nhận được:", req.file);
+
     if (!title) {
       return res.status(400).json({ success: false, message: "Vui lòng nhập tên buổi tập" });
+    }
+
+    // --- XỬ LÝ ẢNH UPLOAD ---
+    let thumbnailUrl = "";
+    if (req.file) {
+        // Lưu đường dẫn tương đối để frontend gọi
+        // Giả sử multer lưu vào thư mục 'uploads'
+        thumbnailUrl = `/uploads/${req.file.filename}`;
     }
 
     const newSession = new Session({
       user: req.user && req.user.id ? req.user.id : null,
       title: title,
       location: location || "Sân tập",
-      // Các trường khác sẽ lấy giá trị default (0, N/A...)
+      
+      // Lưu đường dẫn ảnh vào đây
+      thumbnailUrl: thumbnailUrl, 
+      
+      // Các trường khác mặc định
+      overallScore: 0,
+      overallBand: "N/A",
+      videoCount: 0
     });
 
     await newSession.save();

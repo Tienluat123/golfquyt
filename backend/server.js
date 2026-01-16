@@ -20,6 +20,7 @@ app.use(express.json());
 // Serve processed files (processed videos, thumbnails, etc.)
 const path = require('path');
 app.use('/processed', express.static(path.join(__dirname, 'processed')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Use routes
 app.use('/analyze', analyzeRoutes);

@@ -20,7 +20,6 @@ exports.runPythonScript = (scriptPath, args) => {
     }
 
     
-
     // If the scriptPath is inside the backend folder, run it as a module
     // from the backend root so package imports (services.*, pipeline.*) work.
     const backendRoot = path.resolve(__dirname, '..');

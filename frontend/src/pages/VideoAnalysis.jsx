@@ -47,42 +47,14 @@ const VideoAnalysis = () => {
   }, [data, videoId, sessionId, navigate]);
 
   // Effect: Xử lý Video Events
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
 
-    const updateTime = () => {
-        setCurrentTime(video.currentTime);
-        // Đồng bộ video nền
-        if (bgVideoRef.current && Math.abs(bgVideoRef.current.currentTime - video.currentTime) > 0.2) {
-            bgVideoRef.current.currentTime = video.currentTime;
-        }
-    };
-
-    const updateDuration = () => setDuration(video.duration);
-    
-    const onPlay = () => {
-        setIsPlaying(true);
-        if (bgVideoRef.current) bgVideoRef.current.play();
-    };
-    const onPause = () => {
-        setIsPlaying(false);
-        if (bgVideoRef.current) bgVideoRef.current.pause();
-    };
-
-    video.addEventListener('timeupdate', updateTime);
-    video.addEventListener('loadedmetadata', updateDuration);
-    video.addEventListener('play', onPlay);
-    video.addEventListener('pause', onPause);
-
-    return () => {
-      video.removeEventListener('timeupdate', updateTime);
-      video.removeEventListener('loadedmetadata', updateDuration);
-      video.removeEventListener('play', onPlay);
-      video.removeEventListener('pause', onPause);
-    };
-  }, []);
-
+  const formatTime = (timeInSeconds) => {
+    if (!timeInSeconds || isNaN(timeInSeconds)) return "00:00"; // Check thêm isNaN
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+  
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -91,6 +63,37 @@ const VideoAnalysis = () => {
         videoRef.current.play();
       }
     }
+  };
+
+  // Hàm cập nhật tiến độ (Gắn vào onTimeUpdate)
+  const handleTimeUpdate = () => {
+    const video = videoRef.current;
+    if (video) {
+      setCurrentTime(video.currentTime);
+      // Đồng bộ video nền
+      if (bgVideoRef.current && Math.abs(bgVideoRef.current.currentTime - video.currentTime) > 0.2) {
+         bgVideoRef.current.currentTime = video.currentTime;
+      }
+    }
+  };
+
+  // Hàm cập nhật tổng thời gian (Gắn vào onLoadedMetadata)
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (video) {
+      setDuration(video.duration);
+    }
+  };
+
+  // Hàm đồng bộ Play/Pause video nền
+  const handleVideoPlay = () => {
+    setIsPlaying(true);
+    if (bgVideoRef.current) bgVideoRef.current.play();
+  };
+  
+  const handleVideoPause = () => {
+    setIsPlaying(false);
+    if (bgVideoRef.current) bgVideoRef.current.pause();
   };
 
   const handleProgressClick = (e) => {
@@ -138,6 +141,11 @@ const VideoAnalysis = () => {
         onClick={handlePlayPause}
         playsInline
         crossOrigin="anonymous" 
+
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onPlay={handleVideoPlay}
+        onPause={handleVideoPause}
       />
 
       {/* 3. Overlay */}

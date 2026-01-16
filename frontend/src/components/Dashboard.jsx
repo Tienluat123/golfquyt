@@ -27,7 +27,6 @@ const Dashboard = () => {
           getFeaturedCourses(3)
         ]);
 
-        console.log("Fetched user:", userData);
         setUser(userData);
         console.log("Fetched sessions:", sessionData);
         setSessions(sessionData?.data || []); 
@@ -41,15 +40,21 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const handleCreateSession = async (title, location) => {
-      try {
-          const res = await createNewSession(title, location);
-          if (res.success) {
-              setSessions([res.data, ...sessions]); // Thêm vào đầu danh sách
-              setIsModalOpen(false);
-          }
-      } catch (err) { alert(err.message); }
-  };
+  // Dashboard.js
+
+    const handleCreateSession = async (title, location, thumbnailFile) => { // <--- Thêm tham số này
+        try {
+            // Hàm createNewSession ở service bây giờ nhận 3 tham số
+            const res = await createNewSession(title, location, thumbnailFile);
+            
+            if (res.success) {
+                setSessions([res.data, ...sessions]);
+                setIsModalOpen(false);
+            }
+        } catch (error) {
+            alert("Lỗi: " + error.message);
+        }
+};
 
   if (loading) return <div className="loading-screen">Loading...</div>;
 
@@ -69,17 +74,17 @@ const Dashboard = () => {
 
     {/* 2. Progress Section */}
     <section className="section-block">
-    <h3 className="section-title">Your Progress</h3>
-    
-    {/* Không cần map, chỉ render 1 lần và truyền USER vào */}
-    <div className="card-grid" style={{ display: 'block' }}> {/* display block để nó full width */}
-        {user ? (
-            <ProgressCard user={user} />
-        ) : (
-            <p className="loading-text">Đang tải thông tin thành viên...</p>
-        )}
-    </div>
-</section>
+        <h3 className="section-title">Your Progress</h3>
+        
+        {/* Không cần map, chỉ render 1 lần và truyền USER vào */}
+        <div className="card-grid" style={{ display: 'block' }}> {/* display block để nó full width */}
+            {user ? (
+                <ProgressCard user={user} />
+            ) : (
+                <p className="loading-text">Đang tải thông tin thành viên...</p>
+            )}
+        </div>
+    </section>
         
       
 

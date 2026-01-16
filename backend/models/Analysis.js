@@ -13,9 +13,10 @@ const AnalysisSchema = new mongoose.Schema({
   metrics: {
     score: { type: Number, default: 0 },
     band: { type: String },
-    swingSpeed: { type: Number },
-    wristRotation: { type: Number },
-    hipRotation: { type: Number },
+    swing_speed: { type: Number }, // Lưu ý: Python dùng snake_case (gạch dưới)
+    arm_angle: { type: Number },
+    hip_rotation: { type: Number },
+    wrist_cock: { type: Number },
     tempo: { type: Number }
   },
 

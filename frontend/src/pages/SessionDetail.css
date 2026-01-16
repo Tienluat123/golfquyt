@@ -1,4 +1,4 @@
-/* Session Detail Page */
+/* Session Detail Page Container */
 .session-detail-container {
   padding: 60px 50px 40px;
   background-color: #ffffff;
@@ -29,28 +29,25 @@
   transition: opacity 0.2s ease;
 }
 
-.back-button:hover {
-  opacity: 0.7;
-}
+.back-button:hover { opacity: 0.7; }
+.back-button svg { width: 27px; height: 12px; }
 
-.back-button svg {
-  width: 27px;
-  height: 12px;
-}
-
-/* Main Session Image */
+/* Main Session Image / Cover */
 .session-detail-image {
   width: 100%;
   height: 292px;
-  border-radius: 8px;
+  border-radius: 16px; /* Bo góc mềm mại hơn */
   overflow: hidden;
   margin-bottom: 20px;
+  background-color: #f0f0f0; /* Màu nền khi chưa load ảnh */
 }
 
-.session-detail-image img {
+/* Class mới cho ảnh/video cover */
+.cover-media {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 16px;
 }
 
 /* Session Title */
@@ -89,7 +86,6 @@
   font-weight: 700;
   color: #000000;
   margin: 0;
-  line-height: normal;
 }
 
 .stat-value {
@@ -98,7 +94,6 @@
   font-weight: 700;
   color: #000000;
   margin: 0;
-  line-height: normal;
 }
 
 /* AI Comment Box */
@@ -110,33 +105,24 @@
   display: flex;
   align-items: center;
   gap: 50px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .ai-icon {
-  width: 40px;
-  height: 42px;
-  color: #075b1f;
-  flex-shrink: 0;
+  width: 40px; height: 42px; color: #075b1f; flex-shrink: 0;
 }
 
 .ai-comment-text {
   font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-  line-height: normal;
+  font-size: 14px; font-weight: 700; color: #000000; margin: 0;
+  line-height: 1.5;
 }
 
-/* Videos Section */
+/* Videos Section Title */
 .videos-section-title {
   font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #075b1f;
+  font-size: 24px; font-weight: 700; color: #075b1f;
   margin: 0 0 20px 0;
-  line-height: normal;
 }
 
 .videos-grid {
@@ -146,208 +132,135 @@
   flex-wrap: wrap;
 }
 
-/* Video Card */
+/* --- VIDEO CARD STYLES (Quan trọng) --- */
+
 .video-card {
   width: 294px;
   height: 170px;
-  background: #9cbc12;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
+  background: #000; /* Nền đen để video nổi bật */
+  border-radius: 12px;
+  position: relative; /* Để chứa các phần tử absolute con */
+  overflow: hidden;   /* Bo tròn video bên trong */
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
 }
 
 .video-card:hover {
   transform: translateY(-5px);
-  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Add Video Card */
-.add-video-card {
-  background: #b4c860;
-  height: 170px;
-  justify-content: center;
-  align-items: center;
-}
-
-.add-video-card:hover {
-  background: #a5b655;
-}
-
-.add-video-icon {
-  font-size: 40px;
-  color: #000000;
-  opacity: 0.8;
-}
-
-/* Video Thumbnail */
-.video-thumbnail {
+/* Class cho thẻ <video> nền trong card */
+.card-video-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0; /* Nằm dưới cùng */
 }
 
-.video-thumbnail img {
-  display: none;
+/* Các Overlay đè lên video (Time, Play btn, Stats) */
+.video-time-overlay,
+.video-thumbnail,
+.video-stats {
+  position: absolute;
+  z-index: 2; /* Nổi lên trên video */
+  pointer-events: none; /* Để hover không bị cản bởi chữ */
 }
 
 .video-time-overlay {
-  position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 10px; left: 10px;
   background: rgba(0, 0, 0, 0.6);
   color: #ffffff;
   padding: 4px 8px;
   border-radius: 4px;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: normal;
+  font-size: 12px; font-weight: 700;
+}
+
+.video-thumbnail {
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.3s;
+}
+
+/* Khi hover vào card thì ẩn nút Play to đi để xem video rõ hơn */
+.video-card:hover .video-thumbnail {
+  opacity: 0;
 }
 
 .video-play-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 53px;
-  height: 53px;
+  width: 50px; height: 50px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #075b1f;
-  font-size: 20px;
-  transition: all 0.2s ease;
+  display: flex; align-items: center; justify-content: center;
+  color: #075b1f; font-size: 20px;
 }
 
-.video-card:hover .video-play-button {
-  transform: translate(-50%, -50%) scale(1.1);
-  background: rgba(255, 255, 255, 1);
-}
-
-/* Video Stats */
 .video-stats {
-  display: flex;
-  gap: 15px;
-  padding: 5px 0;
-  position: absolute;
-  z-index: 2;
-  bottom: 10px;
+  bottom: 10px; left: 10px;
+  display: flex; gap: 10px;
 }
 
 .video-stat-badge {
-  background: #075b1f;
-  border-radius: 5px;
-  padding: 5px 20px;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
+  background: rgba(7, 91, 31, 0.9);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px; font-weight: 700;
   color: #ffffff;
-  line-height: normal;
-  white-space: nowrap;
+}
+
+/* --- ADD VIDEO CARD --- */
+.add-video-card {
+  width: 294px;
+  height: 170px;
+  background: #f0fdf4;
+  border: 2px dashed #1B5E20;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #1B5E20;
+  font-weight: 600;
+  gap: 10px;
+}
+
+.add-video-card:hover {
+  background: #dcfce7;
+}
+
+.add-video-icon {
+  font-size: 40px;
+  opacity: 0.8;
 }
 
 /* Loading */
 .loading-message {
   text-align: center;
-  padding: 40px;
-  font-size: 16px;
-  color: #666;
+  padding: 50px;
+  font-size: 18px;
+  color: #075b1f;
+  font-weight: 600;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .session-detail-container {
-    padding: 40px 30px;
-  }
-
-  .session-detail-title {
-    font-size: 42px;
-  }
-
-  .session-stats-grid {
-    flex-direction: column;
-  }
+  .session-detail-container { padding: 40px 30px; }
+  .session-detail-title { font-size: 42px; }
+  .session-stats-grid { flex-direction: column; }
 }
 
 @media (max-width: 768px) {
-  .session-detail-container {
-    padding: 30px 20px;
-  }
-
-  .session-detail-title {
-    font-size: 36px;
-  }
-
-  .session-detail-image {
-    height: 200px;
-  }
-
-  .ai-comment-box {
-    flex-direction: column;
-    gap: 20px;
-    align-items: flex-start;
-  }
-
-  .video-card,
-  .add-video-card {
-    width: 100%;
-    max-width: 400px;
-  }
-
-  .videos-grid {
-    justify-content: center;
-  }
+  .session-detail-container { padding: 30px 20px; }
+  .session-detail-title { font-size: 32px; }
+  .session-detail-image { height: 200px; }
+  
+  .ai-comment-box { flex-direction: column; gap: 15px; align-items: flex-start; }
+  
+  .video-card, .add-video-card { width: 100%; max-width: 100%; height: 200px; }
+  .videos-grid { flex-direction: column; }
 }
-
-
-.cover-media {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 16px;
-}
-
-.add-video-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #f0fdf4;
-    border: 2px dashed #1B5E20;
-    cursor: pointer;
-    gap: 10px;
-    color: #1B5E20;
-    font-weight: 600;
-}
-
-.add-video-card:hover {
-    background-color: #dcfce7;
-}
-
-.video-card {
-    /* Đảm bảo thẻ có height */
-    min-height: 160px; 
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-}
-.video-card:hover { transform: scale(1.02); }

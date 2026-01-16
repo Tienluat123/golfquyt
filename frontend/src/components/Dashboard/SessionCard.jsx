@@ -49,8 +49,8 @@ const SessionCard = ({ session }) => {
       </div>
 
       <div className="card-badges">
-        <span className="badge score">Score: {session.overallScore || 'N/A'}</span>
-        <span className="badge band">Band: {session.overallBand || 'N/A'}</span>
+        <span className="badge score">Score: {session.score || 'N/A'}</span>
+        <span className="badge band">Band: {session.band || 'N/A'}</span>
       </div>
     </div>
   );

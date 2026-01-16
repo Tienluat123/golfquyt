@@ -1,7 +1,7 @@
 const Session = require('../models/Session');
 const Analysis = require('../models/Analysis');
-const { convertBandToPoint, convertPointToBand, estimateScoreFromBand } = require('../utils/bandMapper');
 const aiService = require('./ai.service');
+const { convertBandToPoint, convertPointToBand, estimateScoreFromBand } = require('../utils/bandMapper');
 
 exports.updateSessionAggregates = async (sessionId) => {
     try {
@@ -9,7 +9,7 @@ exports.updateSessionAggregates = async (sessionId) => {
         const analyses = await Analysis.find({ 
             session: sessionId, 
             status: 'completed' 
-        });
+        }).sort({ createdAt: 1 });
 
         if (analyses.length === 0) return;
 

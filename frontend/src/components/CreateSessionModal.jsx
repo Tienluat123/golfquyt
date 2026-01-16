@@ -1,24 +1,48 @@
-import React, { useState } from 'react';
-import './CreateSessionModal.css'; // File CSS ở bước 3
+import React, { useState, useEffect } from 'react';
+import { FaImage, FaTimes } from 'react-icons/fa'; // Thêm icon
+import './CreateSessionModal.css';
 
 const CreateSessionModal = ({ isOpen, onClose, onCreate }) => {
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
+  
+  // State quản lý ảnh
+  const [thumbnail, setThumbnail] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Reset form khi đóng modal
+  useEffect(() => {
+    if (!isOpen) {
+        setTitle('');
+        setLocation('');
+        setThumbnail(null);
+        setPreviewUrl(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  // Xử lý khi chọn file
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setThumbnail(file);
+      // Tạo URL tạm thời để hiện ảnh preview ngay lập tức
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
 
     setIsSubmitting(true);
-    await onCreate(title, location); // Gọi hàm từ cha truyền xuống
+    // Truyền thêm thumbnail (tham số thứ 3)
+    await onCreate(title, location, thumbnail); 
     setIsSubmitting(false);
-    
-    // Reset form
-    setTitle('');
-    setLocation('');
+    onClose(); // Đóng modal sau khi tạo xong
   };
 
   return (
@@ -28,6 +52,35 @@ const CreateSessionModal = ({ isOpen, onClose, onCreate }) => {
         <p>Bắt đầu ghi lại hành trình Golf của bạn</p>
         
         <form onSubmit={handleSubmit}>
+          
+          {/* KHU VỰC CHỌN ẢNH BÌA */}
+          <div className="form-group upload-group">
+            <label>Ảnh bìa (Tùy chọn)</label>
+            <input 
+                type="file" 
+                id="session-thumb" 
+                accept="image/*" 
+                onChange={handleFileChange}
+                hidden // Ẩn nút chọn file xấu xí đi
+            />
+            
+            <label htmlFor="session-thumb" className="upload-box-preview">
+                {previewUrl ? (
+                    // Nếu đã chọn ảnh -> Hiện ảnh preview
+                    <div className="preview-container">
+                        <img src={previewUrl} alt="Preview" />
+                        <div className="overlay-change">Đổi ảnh</div>
+                    </div>
+                ) : (
+                    // Nếu chưa chọn ảnh -> Hiện nút bấm
+                    <div className="placeholder-upload">
+                        <FaImage size={24} color="#1B5E20" />
+                        <span>Nhấn để chọn ảnh bìa</span>
+                    </div>
+                )}
+            </label>
+          </div>
+
           <div className="form-group">
             <label>Tên buổi tập</label>
             <input 

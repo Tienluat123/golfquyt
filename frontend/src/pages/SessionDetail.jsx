@@ -2,32 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaRobot, FaPlus, FaPlay } from 'react-icons/fa';
 import axiosClient from '../utils/axiosConfig';
-import UploadModal from '../components/UploadModal'; // <--- Import Modal Upload (Nhớ tạo file này hoặc dùng lại cái cũ)
-import { analyzeVideo } from '../services/analysis.service'; // Service gọi API upload
+import UploadModal from '../components/UploadModal'; 
+import { analyzeVideo } from '../services/analysis.service'; 
 import './SessionDetail.css';
+
+// Định nghĩa URL Server để dùng chung
+const SERVER_URL = 'http://localhost:5001';
 
 const SessionDetail = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Lấy Session ID từ URL
+  const { id } = useParams(); 
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // State quản lý Modal Upload
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-  // Load dữ liệu khi vào trang
   useEffect(() => {
     fetchSessionDetail();
   }, [id]);
 
   const fetchSessionDetail = async () => {
     try {
-      setLoading(true);
       // Gọi API Backend
       const response = await axiosClient.get(`/sessions/${id}`);
-      // axiosClient may return the raw response body or the wrapper { success, data 
-      const payload = response.data || response;
-      const sessionData = payload.data || payload;
+      console.log('Fetched session detail:', response);
+      // Xử lý dữ liệu trả về linh hoạt
+      const sessionData = response.data?.data || response.data || response;
       setSession(sessionData);
     } catch (err) {
       console.error('Error fetching session:', err);
@@ -44,15 +43,12 @@ const SessionDetail = () => {
 
   const handleUploadVideo = async (file, title) => {
     try {
-      // 1. Chuẩn bị Form Data
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('sessionId', id); // <--- Gửi kèm ID session để backend biết lưu vào đâu
+      formData.append('sessionId', id); 
 
-      // 2. Gọi API Upload
       await analyzeVideo(formData); 
       
-      // 3. Tắt Modal & Reload lại dữ liệu để hiện video mới
       setIsUploadModalOpen(false);
       fetchSessionDetail(); 
       alert("Phân tích thành công!");
@@ -64,31 +60,31 @@ const SessionDetail = () => {
   };
 
   const handleVideoClick = (video) => {
-    // Chuyển sang trang xem video full màn hình (SessionAnalysis)
-    // Truyền dữ liệu qua state để không phải fetch lại
+    // Chuyển sang trang xem video full màn hình
     navigate(`/sessions/${id}/video/${video._id}`, { 
       state: { 
-        data: { data: video }, // Format cho khớp với trang Analysis
-        videoUrl: video.processedVideoUrl 
+        videoData: video, 
+        sessionTitle: session.title 
       } 
     });
   };
 
-  if (loading) {
-    return <div className="session-detail-container"><div className="loading-message">Loading...</div></div>;
-  }
+  if (loading) return <div className="session-detail-container"><div className="loading-message">Loading...</div></div>;
 
-  // Nếu không tìm thấy session
   if (!session) return <div className="session-detail-container">Session not found</div>;
 
-  // --- MAPPING DATA (Kết nối dữ liệu thật) ---
+  // --- MAPPING DATA ---
   const displayTitle = session.title || 'Indoor Arena';
-  const displayImage = session.thumbnailUrl || 'https://via.placeholder.com/800x400?text=Golf+Session'; // Ảnh default
+  
+  // Xử lý URL ảnh cover (Main Image)
+  let coverSrc = session.thumbnailUrl || 'https://via.placeholder.com/800x400?text=Golf+Session';
+  if (coverSrc.startsWith('/')) {
+      coverSrc = `${SERVER_URL}${coverSrc}`;
+  }
+
   const displayScore = session.overallScore || 'N/A';
   const displayBand = session.overallBand || 'N/A';
   const aiComment = session.aiSummary || "Chưa có nhận xét tổng quan.";
-  
-  // Lấy danh sách video từ trường 'analyses' (do virtual populate)
   const videoList = session.analyses || [];
 
   return (
@@ -101,13 +97,12 @@ const SessionDetail = () => {
         </button>
       </div>
 
-      {/* Main Image */}
+      {/* Main Image / Video Cover */}
       <div className="session-detail-image">
-        {/* Nếu là video url thì dùng thẻ video, nếu ảnh thì dùng img */}
-        {displayImage.endsWith('.mp4') ? (
-            <video src={`http://localhost:5001${displayImage}`} className="cover-media" muted autoPlay loop />
+        {coverSrc.endsWith('.mp4') ? (
+            <video src={coverSrc} className="cover-media" muted autoPlay loop playsInline />
         ) : (
-            <img src={displayImage} alt={displayTitle} className="cover-media" />
+            <img src={coverSrc} alt={displayTitle} className="cover-media" />
         )}
       </div>
 
@@ -142,37 +137,54 @@ const SessionDetail = () => {
         </div>
 
         {/* Render danh sách video thật */}
-        {videoList.map((video, index) => (
-          <div 
-            key={video._id || index} 
-            className="video-card"
-            // Nếu có thumbnail riêng thì dùng, ko thì dùng ảnh default
-            style={{ 
-                backgroundImage: `url(${video.thumbnailUrl || 'https://via.placeholder.com/300?text=Swing'})`,
-                backgroundSize: 'cover'
-            }}
-            onClick={() => handleVideoClick(video)}
-          >
-            <div className="video-time-overlay">
-                {new Date(video.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-            </div>
-            
-            <div className="video-thumbnail">
-              <div className="video-play-button"><FaPlay /></div>
-            </div>
-            
-            <div className="video-stats">
-              <span className="video-stat-badge">Band: {video.metrics?.band || 'N/A'}</span>
-            </div>
-          </div>
-        ))}
+        {videoList.map((video, index) => {
+            // Tính toán URL video cho từng item trong vòng lặp
+            let itemVideoSrc = video.processedVideoUrl || '';
+            if (itemVideoSrc.startsWith('/')) {
+                itemVideoSrc = `${SERVER_URL}${itemVideoSrc}`;
+            }
+
+            return (
+              <div 
+                key={video._id || index} 
+                className="video-card"
+                onClick={() => handleVideoClick(video)}
+              >
+                {/* VIDEO HOVER PLAYER */}
+                <video 
+                    src={itemVideoSrc}
+                    className="card-video-bg"
+                    muted 
+                    loop
+                    preload="metadata" // Chỉ tải metadata nhẹ
+                    onMouseOver={event => event.target.play()} // Di chuột vào -> Play
+                    onMouseOut={event => {
+                        event.target.pause(); 
+                        event.target.currentTime = 0; // Di chuột ra -> Dừng & Reset
+                    }}
+                />
+                
+                <div className="video-time-overlay">
+                    {new Date(video.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </div>
+                
+                {/* Play icon overlay */}
+                <div className="video-thumbnail">
+                  <div className="video-play-button"><FaPlay /></div>
+                </div>
+                
+                <div className="video-stats">
+                  <span className="video-stat-badge">Band: {video.metrics?.band || 'N/A'}</span>
+                </div>
+              </div>
+            );
+        })}
       </div>
 
-      {/* Modal Upload (Ẩn/Hiện) */}
       <UploadModal 
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onUpload={handleUploadVideo} // Hàm xử lý khi bấm nút Upload trong modal
+        onUpload={handleUploadVideo} 
       />
     </div>
   );
