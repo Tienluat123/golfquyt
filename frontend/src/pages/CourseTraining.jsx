@@ -61,7 +61,7 @@ const CourseTraining = () => {
   }, [videoRef]);
 
   const handleBack = () => {
-     videoRef.current && videoRef.current.pause();
+    videoRef.current && videoRef.current.pause();
     navigate(`/courses/${courseId}/checklist`);
    
   };

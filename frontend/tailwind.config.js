@@ -14,7 +14,7 @@ export default {
         'brand-highlight': '#b0da54',
         'brand-dark': '#2f3416',
         // Figma Design Colors
-        'Color': '#9cbc12',
+        'Color': '#7b8d28ff',
         'Color-3': '#9cbc12',
         'Color-4': '#075b1f',
         'green-900': '#075b1f',
