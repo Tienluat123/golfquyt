@@ -22,11 +22,12 @@ const SessionDetail = () => {
 
   const fetchSessionDetail = async () => {
     try {
+      setLoading(true);
       // Gọi API Backend
       const response = await axiosClient.get(`/sessions/${id}`);
-      // Dữ liệu nằm trong response.data (nếu config axiosClient trả về data) 
-      // hoặc response.data.data (nếu trả về full response)
-      const sessionData = response.data || response; 
+      // axiosClient may return the raw response body or the wrapper { success, data 
+      const payload = response.data || response;
+      const sessionData = payload.data || payload;
       setSession(sessionData);
     } catch (err) {
       console.error('Error fetching session:', err);

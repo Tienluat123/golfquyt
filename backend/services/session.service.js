@@ -1,6 +1,7 @@
 const Session = require('../models/Session');
 const Analysis = require('../models/Analysis');
 const { convertBandToPoint, convertPointToBand, estimateScoreFromBand } = require('../utils/bandMapper');
+const aiService = require('./ai.service');
 
 exports.updateSessionAggregates = async (sessionId) => {
     try {

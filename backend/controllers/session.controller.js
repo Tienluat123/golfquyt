@@ -48,6 +48,7 @@ exports.getMySessions = async (req, res) => {
       
       score: session.overallScore || 0,
       band: session.overallBand || "N/A",
+      aiSummary: session.aiSummary || "",
     
       thumbnailUrl: session.thumbnailUrl || "" 
     }));
