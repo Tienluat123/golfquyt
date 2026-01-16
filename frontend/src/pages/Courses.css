@@ -8,6 +8,9 @@
 
 .courses-header {
   padding: 20px 30px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .courses-header h1 {
@@ -16,6 +19,39 @@
   font-size: 53px;
   color: #075b1f;
   margin: 0;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background-color: transparent;
+  border: 2px solid #075b1f;
+  border-radius: 25px;
+  padding: 10px 25px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #075b1f;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background-color: rgba(7, 91, 31, 0.1);
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
+  background-color: #075b1f;
+  color: white;
+}
+
+.filter-btn.active:hover {
+  background-color: #064a19;
 }
 
 .loading-state {
@@ -29,17 +65,24 @@
 }
 
 .courses-carousel {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
-  padding: 0 20px;
+  padding: 0 80px;
   flex: 1;
   max-width: 100%;
   overflow: hidden;
 }
 
+.carousel-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
 .carousel-btn {
+  position: absolute;
   background: none;
   border: none;
   cursor: pointer;
@@ -48,19 +91,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
+  z-index: 10;
 }
 
-.carousel-btn:hover {
-  transform: scale(1.1);
+.carousel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.carousel-btn:not(:disabled):hover {
+  transform: scale(1.2);
+  color: #075b1f;
 }
 
 .carousel-btn.prev {
+  left: 20px;
   width: 24px;
   height: 48px;
 }
 
 .carousel-btn.next {
+  right: 20px;
   width: 24px;
   height: 48px;
 }
@@ -69,149 +121,26 @@
   display: flex;
   gap: 40px;
   padding: 10px 0;
-  overflow: hidden;
-}
-
-.course-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px 0;
-  width: 476px;
-  flex-shrink: 0;
-box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0);
-
-}
-
-.course-card:hover {
-  box-shadow: 4px 15px 30px 0px rgba(0, 0, 0, 0);
-}
-
-.course-thumbnail {
-  position: relative;
   width: 100%;
-  height: 548px;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 4px 10px 20px 0px rgba(0, 0, 0, 0.25);
+  will-change: transform;
 }
 
-.course-thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
-.course-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
-  display: flex;
-  flex-direction: column;
-  padding: 20px 22px;
-  justify-content: space-between;
-}
-
-.course-category {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-weight: 700;
-  font-size: 20px;
-  color: white;
-  align-self: flex-start;
-}
-
-.play-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  align-self: flex-end;
-  margin-top: auto;
-  transition: transform 0.2s;
-}
-
-.play-button:hover {
-  transform: scale(1.1);
-}
-
-.course-title {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-weight: 700;
-  font-size: 32px;
-  color: white;
-  margin: 0;
-  line-height: normal;
-}
-
-.course-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 26px 40px;
-}
-
-.start-course-btn {
-  background-color: #075b1f;
-  border: none;
-  border-radius: 20px;
-  padding: 35px 111px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s, box-shadow 0.2s;
-  width: 100%;
-  justify-content: center;
-}
-
-.start-course-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0px 7px 15px 0px rgba(0, 0, 0, 0.6);
-}
-
-.start-course-btn:active {
-  transform: translateY(0);
-}
-
-.start-course-btn svg {
-  flex-shrink: 0;
-}
-
-.start-course-btn span,
-.start-course-btn {
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-weight: 700;
-  font-size: 25px;
-  color: white;
-}
 
 /* Responsive design */
 @media (min-width: 2000px) {
-  .course-card {
-    width: 420px;
-  }
-  
-  .course-thumbnail {
-    height: 500px;
-  }
+  /* ... */
 }
 
 @media (min-width: 1400px) and (max-width: 1999px) {
-  .course-card {
-    width: 450px;
-  }
-  
-  .course-thumbnail {
-    height: 520px;
-  }
+  /* ... */
 }
 
 @media (max-width: 1399px) {
   .courses-carousel {
     gap: 30px;
   }
-  
+
   .carousel-content {
     gap: 30px;
   }
@@ -221,7 +150,7 @@ box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0);
   .course-card {
     width: 400px;
   }
-  
+
   .course-thumbnail {
     height: 480px;
   }
@@ -232,14 +161,8 @@ box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0);
     flex-direction: column;
     align-items: center;
   }
-  
-  .course-card {
-    width: 100%;
-    max-width: 500px;
-  }
-  
+
   .carousel-btn {
     display: none;
   }
 }
-

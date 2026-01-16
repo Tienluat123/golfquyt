@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPlus, FaMapMarkerAlt, FaFlag } from 'react-icons/fa';
 import { getUserProfile } from '../services/user.service';
 import { getRecentSessions, createNewSession } from '../services/session.service';
-import { getFeaturedCourses } from '../services/course.service';
+import { MOCK_COURSES } from '../pages/Courses';
 
 // Import các Component con đã tách
 import SessionCard from './Dashboard/SessionCard';
@@ -21,17 +21,38 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userData, sessionData, courseData] = await Promise.all([
+        const [userData, sessionData] = await Promise.all([
           getUserProfile(),
-          getRecentSessions(3),
-          getFeaturedCourses(3)
+          getRecentSessions(3)
         ]);
 
         console.log("Fetched user:", userData);
         setUser(userData);
         console.log("Fetched sessions:", sessionData);
-        setSessions(sessionData?.data || []); 
-        setCourses(courseData?.data || []);
+        setSessions(sessionData?.data || []);
+
+        // Logical filtering for courses
+        const coursesWithProgress = MOCK_COURSES.map(course => {
+          const hasProgress = localStorage.getItem(`course_${course.id}_progress`);
+          return {
+            ...course,
+            progress: !!hasProgress, // Boolean flag for progress
+            updatedAt: hasProgress ? new Date() : new Date(0) // Mock sort by recent activity if real data existed
+          };
+        });
+
+        // Sort: Resumed courses first
+        coursesWithProgress.sort((a, b) => {
+          if (a.progress && !b.progress) return -1;
+          if (!a.progress && b.progress) return 1;
+          return 0;
+        });
+
+        // Limit to 5
+        const limitedCourses = coursesWithProgress.slice(0, 5);
+
+        setCourses(limitedCourses);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -42,13 +63,13 @@ const Dashboard = () => {
   }, []);
 
   const handleCreateSession = async (title, location) => {
-      try {
-          const res = await createNewSession(title, location);
-          if (res.success) {
-              setSessions([res.data, ...sessions]); // Thêm vào đầu danh sách
-              setIsModalOpen(false);
-          }
-      } catch (err) { alert(err.message); }
+    try {
+      const res = await createNewSession(title, location);
+      if (res.success) {
+        setSessions([res.data, ...sessions]); // Thêm vào đầu danh sách
+        setIsModalOpen(false);
+      }
+    } catch (err) { alert(err.message); }
   };
 
   if (loading) return <div className="loading-screen">Loading...</div>;
@@ -60,34 +81,34 @@ const Dashboard = () => {
         <div className="header-content">
           <h1 className="greeting">Hello, {user?.username || 'Golfer'}!</h1>
           <div className="location-info">
-              <FaMapMarkerAlt className="location-icon" />
-              <span>{user?.location || 'Vietnam'}</span>
+            <FaMapMarkerAlt className="location-icon" />
+            <span>{user?.location || 'Vietnam'}</span>
           </div>
         </div>
       </div>
 
 
-    {/* 2. Progress Section */}
-    <section className="section-block">
-    <h3 className="section-title">Your Progress</h3>
-    
-    {/* Không cần map, chỉ render 1 lần và truyền USER vào */}
-    <div className="card-grid" style={{ display: 'block' }}> {/* display block để nó full width */}
-        {user ? (
+      {/* 2. Progress Section */}
+      <section className="section-block">
+        <h3 className="section-title">Your Progress</h3>
+
+        {/* Không cần map, chỉ render 1 lần và truyền USER vào */}
+        <div className="card-grid" style={{ display: 'block' }}> {/* display block để nó full width */}
+          {user ? (
             <ProgressCard user={user} />
-        ) : (
+          ) : (
             <p className="loading-text">Đang tải thông tin thành viên...</p>
-        )}
-    </div>
-</section>
-        
-      
+          )}
+        </div>
+      </section>
+
+
 
       {/* 3. Golf Session Section */}
       <section className="section-block">
         <h3 className="section-title">Golf Session</h3>
         <div className="card-grid">
-          
+
           {/* Nút dấu cộng mở Modal */}
           <div className="session-card add-card" onClick={() => setIsModalOpen(true)}>
             <FaPlus className="add-icon" />
@@ -119,7 +140,7 @@ const Dashboard = () => {
       </section>
 
       {/* 5. Modal Component */}
-      <CreateSessionModal 
+      <CreateSessionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateSession}

@@ -1,30 +1,68 @@
-
-
 /* --- Responsive cơ bản (Tùy chọn) --- */
 @media (max-width: 768px) {
-  .nav-links { display: none; } /* Ẩn menu trên mobile */
-  .hero-content h1 { font-size: 2.5rem; }
-  .features-grid { grid-template-columns: repeat(2, 1fr); }
-  .about-content { flex-direction: column; }
-  .about-image-placeholder { width: 100%; height: 300px; }
-  .values-content { flex-direction: column; gap: 30px; }
+  .nav-links {
+    display: none;
+  }
+
+  /* Ẩn menu trên mobile */
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-content {
+    flex-direction: column;
+  }
+
+  .about-image-placeholder {
+    width: 100%;
+    height: 300px;
+  }
+
+  .values-content {
+    flex-direction: column;
+    gap: 30px;
+  }
 }
 
 
 
 /* Keep page scrolling default; landing page can opt-in to snap behavior */
-html, body { margin: 0; padding: 0; }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
 
 /* Main container for public layout pages (allow normal scrolling) */
-.main-container { min-height: 100vh; width: 100%; overflow-y: auto; }
+.main-container {
+  min-height: 100vh;
+  width: 100%;
+  overflow-y: auto;
+}
 
 /* Landing page specific snap container - opt-in only */
 .landing-snap-container {
   height: 100vh;
   width: 100vw;
-  overflow-y: scroll;
+  overflow-y: auto;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.landing-snap-container::-webkit-scrollbar {
+  display: none;
 }
 
 .landing-snap-container section {
@@ -46,7 +84,8 @@ footer {
 
 /* 5. Header (Vẫn giữ absolute để đè lên section đầu) */
 .header {
-  position: fixed; /* Đổi thành fixed để nó luôn dính trên cùng khi main cuộn */
+  position: fixed;
+  /* Đổi thành fixed để nó luôn dính trên cùng khi main cuộn */
   top: 0;
   left: 0;
   width: 100%;

@@ -7,7 +7,8 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
-    const container = document.querySelector('.snap-container');
+    // Check for landing-snap-container first (used in LandingPage), then snap-container, then fallback
+    const container = document.querySelector('.landing-snap-container') || document.querySelector('.snap-container');
 
     // Fallback to window if container doesn't exist (though it should in PublicLayout)
     const target = container || window;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEllipsisH } from 'react-icons/fa';
-import axiosClient from '../utils/axiosConfig';
+import { getRecentSessions } from '../services/session.service';
 import './SessionsList.css';
 
 const SessionsList = () => {
@@ -16,7 +16,7 @@ const SessionsList = () => {
   const fetchSessions = async () => {
     try {
       setLoading(false);
-      const response = await axiosClient.get('/sessions');
+      const response = await getRecentSessions(20); // Fetch more items for the list page
       setSessions(response.data || []);
     } catch (err) {
       console.error('Error fetching sessions:', err);
@@ -54,7 +54,7 @@ const SessionsList = () => {
   return (
     <div className="sessions-list-container">
       <h1 className="sessions-list-title">Session</h1>
-      
+
       <div className="sessions-grid">
         {/* Add New Session Card */}
         <div className="session-card-item add-session-card" onClick={handleCreateSession}>
@@ -63,8 +63,8 @@ const SessionsList = () => {
 
         {/* Existing Sessions */}
         {displaySessions.map((session) => (
-          <div 
-            key={session._id} 
+          <div
+            key={session._id}
             className="session-card-item"
             onClick={() => handleSessionClick(session._id)}
           >
@@ -76,7 +76,7 @@ const SessionsList = () => {
             {/* Session Header */}
             <div className="session-card-header">
               <h3 className="session-card-title">{session.title}</h3>
-              <button 
+              <button
                 className="session-options-btn"
                 onClick={(e) => {
                   e.stopPropagation();

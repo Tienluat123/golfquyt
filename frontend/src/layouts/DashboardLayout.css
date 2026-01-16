@@ -1,13 +1,15 @@
 .dashboard-layout {
   display: flex;
   background-color: #FFFFFF;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .dashboard-content {
   flex: 1;
   transition: margin-left 0.3s ease;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
