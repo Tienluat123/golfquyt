@@ -9,7 +9,6 @@ const CourseCard = ({ course }) => {
         <FaEllipsisH className="icon-menu" />
       </div>
       
-      {/* Nếu có ảnh thumbnail thì hiện, không thì hiện số video */}
       <div className="card-body">
          <p className="video-count">{course.level || 'Intermediate'}</p> 
       </div>
