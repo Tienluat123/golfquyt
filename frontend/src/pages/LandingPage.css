@@ -3,8 +3,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative; /* Để GolfScene có thể absolute theo cái này */
+  position: relative;
+  /* Để GolfScene có thể absolute theo cái này */
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .content-container {
@@ -13,7 +15,8 @@
   padding: 0 20px;
   width: 100%;
   flex: 1;
-  z-index: 1; /* Đảm bảo nội dung nằm trên nền */
+  z-index: 1;
+  /* Đảm bảo nội dung nằm trên nền */
   position: relative;
 }
 
@@ -36,7 +39,7 @@
 
 .logo-icon {
   font-size: 2.5rem;
-  filter: drop-shadow(4px 4px 0px var(--brand-color)); 
+  filter: drop-shadow(4px 4px 0px var(--brand-color));
   transition: transform 0.3s;
 }
 

@@ -17,7 +17,9 @@
 }
 
 /* Header Section */
-.dashboard-header-section { margin-bottom: 48px; }
+.dashboard-header-section {
+  margin-bottom: 48px;
+}
 
 .header-content {
   display: flex;
@@ -34,7 +36,9 @@
   line-height: normal;
 }
 
-.location-wrapper { padding: 10px 0; }
+.location-wrapper {
+  padding: 10px 0;
+}
 
 .location-info {
   display: flex;
@@ -82,16 +86,39 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .dashboard-container { padding: 40px 30px; }
-  .greeting { font-size: 32px; }
-  .section-title { font-size: 22px; }
+  .dashboard-container {
+    padding: 40px 30px;
+  }
+
+  .greeting {
+    font-size: 32px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
 }
 
 @media (max-width: 768px) {
-  .dashboard-container { padding: 30px 20px; }
-  .greeting { font-size: 28px; }
-  .location-text { font-size: 16px; }
-  .section-title { font-size: 20px; }
-  .card-grid { justify-content: center; }
+  .dashboard-container {
+    padding: 30px 20px;
+  }
+
+  .greeting {
+    font-size: 28px;
+  }
+
+  .location-text {
+    font-size: 16px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .card-grid {
+    justify-content: center;
+  }
+
   /* Các card sẽ tự full width nếu component con hỗ trợ */
 }
