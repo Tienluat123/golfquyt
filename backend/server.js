@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const userRoutes = require('./routes/user.route');
 const sessionRoutes = require('./routes/session.route');
 const courseRoutes = require('./routes/course.route');
+const chatbotRoutes = require('./routes/chatbot.route');
 
 // Kết nối Database
 connectDB();
@@ -29,6 +30,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/sessions', sessionRoutes);
 app.use('/courses', courseRoutes);
+app.use('/chatbot', chatbotRoutes);
 
 
 app.listen(PORT, () => {

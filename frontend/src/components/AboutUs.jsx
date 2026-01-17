@@ -9,16 +9,17 @@ const AboutUs = () => {
         <div className="about-content">
           <div className="about-image-placeholder"></div>
           <div className="about-text">
-            <h3>Welcome bla bla</h3>
+            <h3>Welcome!!!</h3>
             <p>
-              We are dedicated to revolutionizing golf training through innovative technology. 
-              Our mission is to make professional-grade coaching accessible to everyone, 
-              helping golfers of all levels achieve their full potential.
+              We are Quả Quýt, a determined student team from the University of Science, HCM City – VietNam National University.
             </p>
             <br />
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-              incididunt ut labore et dolore magna aliqua.
+              Our name, Quả Quýt - is a homophone for Quả Quyết, signifying determination and resolve. This reflects our approach: we are passionate students with a clear, focused mindset for learning and tackling challenges.
+            </p>
+            <br />
+            <p>
+              Majoring in Computer Science, Computer Vision and Software Engineering, our team is dedicated to pooling our academic knowledge and developing practical, innovative solutions.
             </p>
           </div>
         </div>

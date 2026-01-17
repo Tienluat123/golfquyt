@@ -13,6 +13,7 @@
   flex: 1;
   height: 400px;
   background-color: #E0E0E0; /* Màu xám placeholder */
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('aboutus.jpg') no-repeat center center/cover;
   border-radius: 10px;
 }
 

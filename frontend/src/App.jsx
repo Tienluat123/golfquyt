@@ -16,40 +16,42 @@ import Courses from './pages/Courses';
 import CourseChecklist from './pages/CourseChecklist';
 import CourseTraining from './pages/CourseTraining';
 import CourseComplete from './pages/CourseComplete';
+import AITrainer from './pages/AITrainer';
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        
-        {/* --- NHÓM 1: PUBLIC (Có Header, Footer) --- */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          {/* Thêm các trang public khác nếu có: About, Contact... */}
-        </Route>
+    return (
+        <Router>
+            <Routes>
+
+                {/* --- NHÓM 1: PUBLIC (Có Header, Footer) --- */}
+                <Route element={<PublicLayout />}>
+                    <Route path="/" element={<LandingPage />} />
+                    {/* Thêm các trang public khác nếu có: About, Contact... */}
+                </Route>
 
 
-        {/* --- NHÓM 2: AUTH (Độc lập, không Header/Footer/Sidebar) --- */}
-        <Route path="/login" element={<Auth />} />
+                {/* --- NHÓM 2: AUTH (Độc lập, không Header/Footer/Sidebar) --- */}
+                <Route path="/login" element={<Auth />} />
 
 
-        {/* --- NHÓM 3: PRIVATE (Có Sidebar, không Header cũ) --- */}
-        <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:courseId/checklist" element={<CourseChecklist />} />
-          <Route path="/sessions" element={<SessionsList />} />
-          <Route path="/sessions/:id" element={<SessionDetail />} />
-        </Route>
-        
-        {/* Full Screen Routes (No Sidebar) */}
-        <Route path="/sessions/:sessionId/video/:videoId" element={<VideoAnalysis />} />
-        <Route path="/courses/:courseId/training/:stepId" element={<CourseTraining />} />
-        <Route path="/courses/:courseId/complete" element={<CourseComplete />} />
+                {/* --- NHÓM 3: PRIVATE (Có Sidebar, không Header cũ) --- */}
+                <Route element={<DashboardLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/courses" element={<Courses />} />
+                    <Route path="/courses/:courseId/checklist" element={<CourseChecklist />} />
+                    <Route path="/sessions" element={<SessionsList />} />
+                    <Route path="/sessions/:id" element={<SessionDetail />} />
+                    <Route path="/ai-trainer" element={<AITrainer />} />
+                </Route>
 
-      </Routes>
-    </Router>
-  );
+                {/* Full Screen Routes (No Sidebar) */}
+                <Route path="/sessions/:sessionId/video/:videoId" element={<VideoAnalysis />} />
+                <Route path="/courses/:courseId/training/:stepId" element={<CourseTraining />} />
+                <Route path="/courses/:courseId/complete" element={<CourseComplete />} />
+
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

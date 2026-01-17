@@ -54,7 +54,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
               <span className="nav-label">Courses</span>
             </NavLink>
 
-            <NavLink to="/analysis" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+            <NavLink to="/ai-trainer" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <div className="nav-icon-wrapper">
                 <FaRobot className="nav-icon" size={28} />
               </div>

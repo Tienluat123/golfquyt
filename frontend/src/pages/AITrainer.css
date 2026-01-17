@@ -1,0 +1,337 @@
+.ai-trainer-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: linear-gradient(135deg, #F5F5F5 0%, #E8F5E9 100%);
+}
+
+/* Header */
+.ai-trainer-header {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    color: white;
+    padding: 24px 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.ai-trainer-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.ai-trainer-header p {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Main Container */
+.ai-trainer-container {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+}
+
+/* Messages Area */
+.ai-messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ai-messages-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ai-messages-area::-webkit-scrollbar-track {
+    background: #F5F5F5;
+    border-radius: 4px;
+}
+
+.ai-messages-area::-webkit-scrollbar-thumb {
+    background: #BDBDBD;
+    border-radius: 4px;
+}
+
+.ai-messages-area::-webkit-scrollbar-thumb:hover {
+    background: #9E9E9E;
+}
+
+/* Message Wrapper */
+.ai-message-wrapper {
+    display: flex;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+}
+
+.ai-message-wrapper.user {
+    flex-direction: row-reverse;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Avatar */
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: white;
+    font-weight: 600;
+}
+
+.ai-message-wrapper.user .message-avatar {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+}
+
+.ai-message-wrapper.assistant .message-avatar {
+    background: linear-gradient(135deg, #424242 0%, #616161 100%);
+}
+
+/* Message Bubble */
+.message-bubble {
+    max-width: 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.message-text {
+    padding: 16px 20px;
+    border-radius: 16px;
+    line-height: 1.6;
+    font-size: 15px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.ai-message-wrapper.user .message-text {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.ai-message-wrapper.assistant .message-text {
+    background: #F5F5F5;
+    color: #212121;
+    border-bottom-left-radius: 4px;
+}
+
+.message-timestamp {
+    font-size: 12px;
+    color: #757575;
+    padding: 0 8px;
+}
+
+.ai-message-wrapper.user .message-timestamp {
+    text-align: right;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 6px;
+    padding: 16px 20px;
+}
+
+.typing-indicator span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #BDBDBD;
+    animation: typing 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Quick Suggestions */
+.quick-suggestions {
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.suggestions-label {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #424242;
+}
+
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.suggestion-btn {
+    padding: 12px 16px;
+    background: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #424242;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.suggestion-btn:hover {
+    background: #E8F5E9;
+    border-color: #1B5E20;
+    color: #1B5E20;
+    transform: translateY(-2px);
+}
+
+/* Input Area */
+.ai-input-area {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.input-container {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.ai-input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #E0E0E0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: none;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ai-input:focus {
+    border-color: #1B5E20;
+}
+
+.ai-input:disabled {
+    background: #F5F5F5;
+    cursor: not-allowed;
+}
+
+.ai-send-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.ai-send-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+}
+
+.ai-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ai-trainer-header {
+        padding: 20px 16px;
+    }
+
+    .ai-trainer-header h1 {
+        font-size: 22px;
+    }
+
+    .ai-trainer-container {
+        padding: 16px;
+    }
+
+    .message-bubble {
+        max-width: 85%;
+    }
+
+    .suggestions-grid {
+        grid-template-columns: 1fr;
+    }
+}
