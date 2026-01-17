@@ -14,7 +14,7 @@ exports.analyzeVideo = async (req, res) => {
 
     const userId = req.user && req.user.id ? req.user.id : null;
     const result = await analysisService.processAnalysis(req.file, sessionId, userId);
-
+    
     res.json({
       success: true,
       data: result

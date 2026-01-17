@@ -5,7 +5,7 @@ const CoursePageCard = ({ course, progress, onStart }) => {
     return (
         <div className="course-page-card">
             <div className="course-page-thumbnail">
-                <img src={course.thumbnail} alt={course.title} />
+                <img src={course.thumbnailUrl || course.thumbnail} alt={course.title} />
                 <div className="course-page-overlay">
                     <span className="course-page-category">{course.category}</span>
                     <button className="course-page-play-btn">
@@ -20,7 +20,7 @@ const CoursePageCard = ({ course, progress, onStart }) => {
             <div className="course-page-footer">
                 <button
                     className="course-page-start-btn"
-                    onClick={() => onStart(course.id)}
+                    onClick={() => onStart(course._id || course.id)}
                 >
                     {progress ? 'Resume' : 'Start Course'}
                 </button>

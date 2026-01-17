@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 const analyzeRoutes = require('./routes/analyze.route');
 const authRoutes = require('./routes/auth.route');
 const connectDB = require('./config/db');
@@ -25,11 +26,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Use routes
 app.use('/analyze', analyzeRoutes);
 app.use('/auth', authRoutes);
-app.use('/users', userRoutes);      
-app.use('/sessions', sessionRoutes); 
-app.use('/courses', courseRoutes);  
+app.use('/users', userRoutes);
+app.use('/sessions', sessionRoutes);
+app.use('/courses', courseRoutes);
 
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
